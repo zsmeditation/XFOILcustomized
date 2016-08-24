@@ -1935,11 +1935,11 @@ C
 C
       IF(KDELIM.EQ.0) THEN
        WRITE(LU,1000)
-     & '#    s        x        y     Ue/Vinf    Dstar     Theta ',
-     & '     Cf       H'
-     &,'       H*        P         m          K          tau        Di',
-     & '   Uinv/Vinf'
-C         1.23456  0.23451  0.23451  0.23451  0.012345  0.001234  0.004123  10.512
+     & '#  s               x               y               Ue/Vinf',
+     & '         Dstar           Theta           Cf              H',
+     & '               H*'
+C    &,'   P         m          K          tau        DiUinv/Vinf'
+C          0.00000000E+00  0.10000000E+01  0.42000000E-03  0.99214280E+00  0.73712695E-02  0.23842710E-02  0.74198645E-03  0.30916240E+01  0.15353862E+01
       ELSE
        WRITE(LU,1000)
      & '#s'     ,DELIM,
@@ -1991,11 +1991,11 @@ C
         CALL HKIN( H, AMSQ, HK, DUMMY, DUMMY)
 C
         IF(KDELIM.EQ.0) THEN
-         WRITE(LU,8500) S(I), X(I), Y(I), UE, DS, TH, CF, HK
-     &    , HS, TH*UE**2, DS*UE, TS*UE**3
-     &    , TAU(IBL,IS), DIS(IBL,IS), cdis, UI
- 8500    FORMAT(1X, 4F9.5, 3F10.6, F10.4, 
-     &       f10.4, 3f9.5, 2f10.6, f10.6, F10.6 )
+         WRITE(LU,8500) S(I), X(I), Y(I), UE, DS, TH, CF, HK, HS
+C    &    , TH*UE**2, DS*UE, TS*UE**3
+C    &    , TAU(IBL,IS), DIS(IBL,IS), cdis, UI
+ 8500    FORMAT(1X, 9E16.8) 
+C    &       f10.4, 3f9.5, 2f10.6, f10.6, F10.6 )
 C
         ELSE
          WRITE(LINE,8510) 
