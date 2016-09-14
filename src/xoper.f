@@ -1956,6 +1956,7 @@ C
       CALL COMSET
       HSTINV = GAMM1*(MINF/QINF)**2 / (1.0 + 0.5*GAMM1*MINF**2)
 C
+C----- Dump wall results
       DO 10 I=1, N
         IS = 1
         IF(GAM(I) .LT. 0.0) IS = 2
@@ -1996,7 +1997,7 @@ C
 C    &    , UI
 C    &    , TH*UE**2, DS*UE, TS*UE**3
 C    &    , TAU(IBL,IS), DIS(IBL,IS), cdis
- 8500    FORMAT(1X, 9E16.8) 
+ 8500    FORMAT(1X, F4.2, 9E14.6)
 C    &       f10.4, 3f10.5, 2f10.6, f10.6, F10.6 )
 C
         ELSE
@@ -2016,6 +2017,7 @@ C
 C
   10  CONTINUE
 C
+C----- Dump wake results
       IF(LWAKE) THEN
         IS = 2
         DO 20 I=N+1, N+NW
