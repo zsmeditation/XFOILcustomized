@@ -1937,7 +1937,7 @@ C
        WRITE(LU,1000)
      & '#  s               x               y               Ue/Vinf',
      & '         Dstar           Theta           Cf',
-     & '              H               H*'
+     & '              H               H*               CDIS'
 C    &,'         Uinv/Vinf'
 C    &,'   P         m          K          tau        Di'
 C          0.00000000E+00  0.10000000E+01  0.42000000E-03  0.99214280E+00  0.73712695E-02  0.23842710E-02  0.74198645E-03  0.30916240E+01  0.15353862E+01
@@ -1992,7 +1992,7 @@ C
         CALL HKIN( H, AMSQ, HK, DUMMY, DUMMY)
 C
         IF(KDELIM.EQ.0) THEN
-         WRITE(LU,8500) S(I), X(I), Y(I), UE, DS, TH, CF, HK, HS
+         WRITE(LU,8500) S(I), X(I), Y(I), UE, DS, TH, CF, HK, HS, CDIS
 C    &    , UI
 C    &    , TH*UE**2, DS*UE, TS*UE**3
 C    &    , TAU(IBL,IS), DIS(IBL,IS), cdis
@@ -2026,13 +2026,14 @@ C
           H = DS/TH
           HS = TS/TH
           CF = 0.
+          CDIS = DIS(IBL,IS)/(QINF**3)
           UI = UEDG(IBL,IS)
           UE = (UI/QINF)*(1.0-TKLAM) / (1.0 - TKLAM*(UI/QINF)**2)
           AMSQ = UE*UE*HSTINV / (GAMM1*(1.0 - 0.5*UE*UE*HSTINV))
           CALL HKIN( H, AMSQ, HK, DUMMY, DUMMY)
 C
           IF(KDELIM.EQ.0) THEN
-           WRITE(LU,8500) S(I), X(I), Y(I), UE, DS, TH, CF, HK, HS
+           WRITE(LU,8500) S(I), X(I), Y(I), UE, DS, TH, CF, HK, HS, CDIS
 C    &    , UI
 C
           ELSE
