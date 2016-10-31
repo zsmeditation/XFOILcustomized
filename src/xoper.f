@@ -1,8 +1,8 @@
 C***********************************************************************
 C    Module:  xoper.f
-C 
-C    Copyright (C) 2000 Mark Drela 
-C 
+C
+C    Copyright (C) 2000 Mark Drela
+C
 C    This program is free software; you can redistribute it and/or modify
 C    it under the terms of the GNU General Public License as published by
 C    the Free Software Foundation; either version 2 of the License, or
@@ -420,7 +420,7 @@ C------- set inviscid solution only if point is not being recalculated
          IF(NINPUT.GE.1) THEN
           ADEG = RINPUT(1)
          ELSE
-          ADEG = ALFA/DTOR          
+          ADEG = ALFA/DTOR
           CALL ASKR('Enter angle of attack (deg)^',ADEG)
          ENDIF
          LALFA = .TRUE.
@@ -429,7 +429,7 @@ C------- set inviscid solution only if point is not being recalculated
          CALL SPECAL
          IF(ABS(ALFA-AWAKE) .GT. 1.0E-5) LWAKE  = .FALSE.
          IF(ABS(ALFA-AVISC) .GT. 1.0E-5) LVCONV = .FALSE.
-         IF(ABS(MINF-MVISC) .GT. 1.0E-5) LVCONV = .FALSE. 
+         IF(ABS(MINF-MVISC) .GT. 1.0E-5) LVCONV = .FALSE.
        ENDIF
 C
        IF(LVISC) CALL VISCAL(ITMAX)
@@ -611,7 +611,7 @@ C
          IF(DCL .NE. 0.0) NPOINT = INT((CL2-CL1)/DCL + 0.5) + 1
        ENDIF
 C
-C- - - - - - - - - - - - - - - - - - 
+C- - - - - - - - - - - - - - - - - -
 C
 C----- initialize plot
        CALL PLTINI
@@ -841,7 +841,7 @@ C
 C
         LU = 17
         CALL POLREAD(LU,FNAME,ERROR,
-     &             NAX,NAPOL(IP),CPOL(1,1,IP), 
+     &             NAX,NAPOL(IP),CPOL(1,1,IP),
      &             REYNP1(IP),MACHP1(IP),ACRITP(1,IP),XSTRIPP(1,IP),
      &             PTRATP(IP),ETAPP(IP),
      &             NAMEPOL(IP),IRETYP(IP),IMATYP(IP),
@@ -897,9 +897,9 @@ C
           CALL PLRSUM(IP,IP,IPACT)
           CALL STRIP(PFNAME(IP),NPF)
           IF(NPF.EQ.0) THEN
-           LINE = 'Enter polar output filename^' 
+           LINE = 'Enter polar output filename^'
           ELSE
-           LINE = 'Enter polar output filename [' 
+           LINE = 'Enter polar output filename ['
      &            // PFNAME(IP)(1:NPF) // ']^'
           ENDIF
           CALL ASKS(LINE,FNAME)
@@ -1355,7 +1355,7 @@ C------- check all alpha points in polar IP
          DO IA = 1, NAPOL(IP)
            ADIF = CPOL(IA,IAL,IP) - RINPUT(IREM+1)
            IF(ABS(ADIF) .LT. 0.0005) THEN
-C---------- alphas match within 3-digit print tolerance... 
+C---------- alphas match within 3-digit print tolerance...
 C-             remove point by pulling down all points above it
             DO JA = IA, NAPOL(IP)-1
               DO K = 1, IPTOT
@@ -1390,7 +1390,7 @@ C---------- go to next specified alpha to be removed
            ENDIF
          ENDDO
  55    CONTINUE
-C         
+C
 C--------------------------------------------------------
       ELSEIF(COMAND.EQ.'PNAM') THEN
        IF(NPOL.EQ.0) THEN
@@ -1575,7 +1575,7 @@ c       ENDIF
          dpr = 0.01
         endif
 
-C       
+C
        IF(SGN .GT. 0.0) THEN
         SPR = SLE + (S(1)-SLE)*XOC
        ELSE
@@ -1690,7 +1690,7 @@ C--------------------------------------------------------
        LCMINP = .NOT.LCMINP
        IF(LCMINP) THEN
         WRITE(*,*) 'Min Cp will be written to polar save file'
-       ELSE 
+       ELSE
         WRITE(*,*) 'Min Cp won''t be written to polar save file'
        ENDIF
 C
@@ -1704,7 +1704,7 @@ C--------------------------------------------------------
          WRITE(*,*) 'Note: Flap hinge location not defined'
          WRITE(*,*) '      Set it with FNEW,FMOM commands'
         ENDIF
-       ELSE 
+       ELSE
         WRITE(*,*) 'Hinge moment won''t be written to polar save file'
        ENDIF
 C
@@ -1745,7 +1745,7 @@ C--------------------------------------------------------
        IF(IDAMP.EQ.0) THEN
         IDAMP = 1
         WRITE(*,*) 'Modified amplification used'
-       ELSE 
+       ELSE
         IDAMP = 0
         WRITE(*,*) 'Original amplification used'
        ENDIF
@@ -1831,15 +1831,15 @@ C
       SUBROUTINE NAMMOD(NAME,KDEL,KMOD0)
       CHARACTER*(*) NAME
 C-------------------------------------------
-C     Requests new modified NAME with 
+C     Requests new modified NAME with
 C     version number in brackets, e.g.
 C            NACA 0012  [5]
 C
 C     If bracketed index exists in NAME,
 C        it is incremented by KDEL.
-C     If no bracketed index exists, it 
+C     If no bracketed index exists, it
 C        is added with initial value KMOD0,
-C        unless KMOD0 is negative in which 
+C        unless KMOD0 is negative in which
 C        case nothing is added.
 C-------------------------------------------
       CHARACTER*48 NAMDEF
@@ -1850,7 +1850,7 @@ C
 C
       NAMDEF = NAME(1:NNAME)
 C
-      IF(KBRACK1.NE.0 .AND. 
+      IF(KBRACK1.NE.0 .AND.
      &   KBRACK2.NE.0 .AND. KBRACK2-KBRACK1.GT.1) THEN
 C----- brackets exist... get number, (go get user's input on READ error)
        READ(NAME(KBRACK1+1:KBRACK2-1),*,ERR=40) KMOD
@@ -1997,11 +1997,11 @@ C
 C    &    , UI
 C    &    , TH*UE**2, DS*UE, TS*UE**3
 C    &    , TAU(IBL,IS), DIS(IBL,IS), cdis
- 8500    FORMAT(1X, F4.2, 9E14.6)
+ 8500    FORMAT(1X, 10E14.6)
 C    &       f10.4, 3f10.5, 2f10.6, f10.6, F10.6 )
 C
         ELSE
-         WRITE(LINE,8510) 
+         WRITE(LINE,8510)
      &     S(I),DELIM,
      &     X(I),DELIM,
      &     Y(I),DELIM,
@@ -2039,7 +2039,7 @@ C
 C    &    , UI
 C
           ELSE
-           WRITE(LINE,8510) 
+           WRITE(LINE,8510)
      &      S(I),DELIM,
      &      X(I),DELIM,
      &      Y(I),DELIM,
@@ -2109,7 +2109,7 @@ C
       WRITE(LU,1000)
      & '#    s        x        y      Ue/Vinf ',
      & '   Dstar      Theta      Tstar',
-     & '       Cf         CD         H         H*  ', 
+     & '       Cf         CD         H         H*  ',
      & '       m          P         Pf        Pp         K/2  ',
      & '       tau       Diss    -m du/ds    dP/ds      DV    ',
      & '     dm/ds     N     Rtheta'
@@ -2234,7 +2234,7 @@ C
           RT = 0.
         ENDIF
 C
-        WRITE(LU,8500) 
+        WRITE(LU,8500)
      &      XS, X(I), Y(I), UE,
      &      DS, TH, TS,
      &      CF, CDIS,  HK, HS,
@@ -2245,11 +2245,11 @@ C
      &      DMDS,
      &      CT,
      &      RT
- 8500    FORMAT(1X, 
-     &       4F9.5, 
+ 8500    FORMAT(1X,
+     &       4F9.5,
      &      3F11.7,
-     &      2F11.7, 2F10.4, 
-     &      5F11.7, 
+     &      2F11.7, 2F10.4,
+     &      5F11.7,
      &      4F11.7,
      &       F11.7,
      &       F11.7,
@@ -2342,7 +2342,7 @@ C
          WRITE(LU,8500) X(I), CPCOM
  8500    FORMAT(1X,2F11.5)
         ELSE
-         WRITE(LINE,8510) 
+         WRITE(LINE,8510)
      &    X(I) , DELIM,
      &    CPCOM
  8510    FORMAT(1X,2(F11.5,A))
@@ -2374,8 +2374,8 @@ C
 C------ find top and bottom y at hinge x location
         TOPS = XOF
         BOTS = S(N) - XOF
-        CALL SINVRT(TOPS,XOF,X,XP,S,N)      
-        CALL SINVRT(BOTS,XOF,X,XP,S,N)      
+        CALL SINVRT(TOPS,XOF,X,XP,S,N)
+        CALL SINVRT(BOTS,XOF,X,XP,S,N)
 C
       ENDIF
 C
@@ -2522,7 +2522,7 @@ C
      &              VACCEL,
      &              WAKLEN,
      &              SCCON , DUXCON, DLCON,
-     &              GACON , GBCON , CTCON, 
+     &              GACON , GBCON , CTCON,
      &              CTRCON, CTRCEX
  1200 FORMAT(
      &  /' Xtr/c     =', F8.4, '    top    side'
@@ -2824,8 +2824,8 @@ C---- set final Mach, CL, Cp distributions, and hinge moment
 C
       RETURN
       END ! SPECAL
- 
- 
+
+
       SUBROUTINE SPECCL
 C-----------------------------------------
 C     Converges to specified inviscid CL.
@@ -3007,9 +3007,9 @@ C------ set updated CL,CD
         CALL CDCALC
 C
 C------ display changes and test for convergence
-        IF(RLX.LT.1.0) 
+        IF(RLX.LT.1.0)
      &   WRITE(*,2000) ITER, RMSBL, RMXBL, VMXBL,IMXBL,ISMXBL,RLX
-        IF(RLX.EQ.1.0) 
+        IF(RLX.EQ.1.0)
      &   WRITE(*,2010) ITER, RMSBL, RMXBL, VMXBL,IMXBL,ISMXBL
          CDPDIF = CD - CDF
          WRITE(*,2020) ALFA/DTOR, CL, CM, CD, CDF, CDPDIF
@@ -3040,14 +3040,14 @@ C
         do ibl = 2, iblte(is)
           hki = dstr(ibl,is) / thet(ibl,is)
           hkmax = max(hki,hkmax)
-          if(hkm .lt. 4.0 .and. 
+          if(hkm .lt. 4.0 .and.
      &       hki .ge. 4.0      ) then
            hfrac = (4.0 - hkm) / (hki - hkm )
            pdefm = uedg(ibl-1,is)**2 * thet(ibl-1,is)
            pdefi = uedg(ibl  ,is)**2 * thet(ibl  ,is)
            psep = pdefm*(1.0-hfrac) + pdefi*hfrac
           endif
-          if(hkm .gt. 4.0 .and. 
+          if(hkm .gt. 4.0 .and.
      &       hki .lt. 4.0      ) then
            hfrac = (4.0 - hkm) / (hki - hkm )
            pdefm = uedg(ibl-1,is)**2 * thet(ibl-1,is)
@@ -3058,7 +3058,7 @@ C
         enddo
         delp = patt - psep
 
-        write(*,9922) 
+        write(*,9922)
      &    acrit(is), hkmax, cd, 2.0*psep, 2.0*patt, 2.0*delp,
      &    xoctr(is)
  9922   format(1x, f10.3, f10.4, f11.6, 3f11.6, f10.4, '     #')
@@ -3074,13 +3074,13 @@ cc      fnum = acrit(is)
         ione = int( (fnum-float(10*iten)) / 0.99999 )
         idec = int( (fnum-float(10*iten)-float(ione)) / 0.09999 )
 
-        fname = char(iten+izero) 
-     &       // char(ione+izero) 
+        fname = char(iten+izero)
+     &       // char(ione+izero)
      &       // char(idec+izero) // '.bl'
         lu = 44
         open(lu,file=fname,status='unknown')
         rewind(lu)
-        write(lu,'(a,a)') 
+        write(lu,'(a,a)')
      &'#       s         ue          H          P         K ',
      &'        x    -m du/dx'
 c       1234567890 1234567890 1234567890 1234567890 1234567890 1234567890
@@ -3095,7 +3095,7 @@ c       1234567890 1234567890 1234567890 1234567890 1234567890 1234567890
           duds = (uedg(iblp,is)-uedg(iblm,is))
      &         / (xssi(iblp,is)-xssi(iblm,is))
           dpds = -ddef*duds
-          write(lu,9977) 
+          write(lu,9977)
      &       xssi(ibl,is), uedg(ibl,is), hk, pdef, edef, x(i), dpds
  9977     format(1x, 3f11.4, 2f11.6, f11.3, e14.6 )
         enddo
@@ -3123,7 +3123,7 @@ C....................................................................
       subroutine dcpout
       include 'XFOIL.INC'
 c
-c     Computes and writes upper and lower-surface 
+c     Computes and writes upper and lower-surface
 c     Cp values at two specified x locations
 c
 c
@@ -3159,7 +3159,7 @@ c
       cpl2 = seval(sl2,cpv,w1,s,n)
       cpu2 = seval(su2,cpv,w1,s,n)
 c
-      write(lu,1200) alfa/dtor, cl, 
+      write(lu,1200) alfa/dtor, cl,
      &               cpl1, cpu1, cpl1-cpu1,
      &               cpl2, cpu2, cpl2-cpu2
 
