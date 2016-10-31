@@ -1935,9 +1935,9 @@ C
 C
       IF(KDELIM.EQ.0) THEN
        WRITE(LU,1000)
-     & '#  s               x               y               Ue/Vinf',
-     & '         Dstar           Theta           Cf',
-     & '              H               H*               CDIS'
+     & '#  (1)s          (2)x          (3)y          (4)Ue/Vinf    ',
+     & '(5)Dstar      (6)Theta      (7)Cf         (8)H          ',
+     & '(9)H*         (10)CDIS'
 C    &,'         Uinv/Vinf'
 C    &,'   P         m          K          tau        Di'
 C          0.00000000E+00  0.10000000E+01  0.42000000E-03  0.99214280E+00  0.73712695E-02  0.23842710E-02  0.74198645E-03  0.30916240E+01  0.15353862E+01
