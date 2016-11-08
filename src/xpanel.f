@@ -195,6 +195,8 @@ C
         X1 = SX*RX1 + SY*RY1 ! panel reference coordinate x_1
         X2 = SX*RX2 + SY*RY2 ! panel reference coordinate x_2
         YY = SX*RY1 - SY*RX1 ! panel reference coordinate y = y_1 = y_2
+        ! note that YY = (RX1,RY1) . (-SY,SX)
+        ! where (-SY,SX) is obtained by rotating (SX,SY) CCW by pi/2 radians
 C
         RS1 = RX1*RX1 + RY1*RY1 ! r_1^2
         RS2 = RX2*RX2 + RY2*RY2 ! r_2^2
