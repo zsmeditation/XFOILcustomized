@@ -99,7 +99,7 @@ C
       SUBROUTINE PSILIN(I,XI,YI,NXI,NYI,PSI,PSI_NI,GEOLIN,SIGLIN)
 C-----------------------------------------------------------------------
 C     Calculates current streamfunction Psi at panel node or wake node
-C     I due to freestream and all bound vorticity Gam on the airfoil.
+C     I (XI,YI) due to **freestream and all bound vorticity Gam on the airfoil**.
 C     Sensitivities of Psi with respect to alpha (Z_ALFA) and inverse
 C     Qspec DOFs (Z_QDOF0,Z_QDOF1) which influence Gam in inverse cases.
 C     Also calculates the sensitivity vector dPsi/dGam (DZDG).
@@ -159,7 +159,8 @@ C
        SDS = ASTE/DSTE
       ENDIF
 C
-      DO 10 JO=1, N ! loop over nodes on airfoil
+C---- loop over nodes on airfoil
+      DO 10 JO=1, N
         JP = JO+1
 C
         JM = JO-1
@@ -195,8 +196,8 @@ C
         X2 = SX*RX2 + SY*RY2 ! panel reference coordinate x_2
         YY = SX*RY1 - SY*RX1 ! panel reference coordinate y = y_1 = y_2
 C
-        RS1 = RX1*RX1 + RY1*RY1 ! distance r_1
-        RS2 = RX2*RX2 + RY2*RY2 ! distance r_2
+        RS1 = RX1*RX1 + RY1*RY1 ! r_1^2
+        RS2 = RX2*RX2 + RY2*RY2 ! r_2^2
 C
 C------ set reflection flag SGN to avoid branch problems with arctan
         IF(IO.GE.1 .AND. IO.LE.N) THEN
@@ -224,6 +225,7 @@ C
          T2 = 0.0
         ENDIF
 C
+C------ Sensitivities
         X1I = SX*NXI + SY*NYI
         X2I = SX*NXI + SY*NYI
         YYI = SX*NYI - SY*NXI
@@ -242,10 +244,13 @@ C
          YYP =-((RX1-X1*SY)*NYP - (RY1+X1*SX)*NXP)*DSIO
         ENDIF
 C
-        IF(JO.EQ.N) GO TO 11
+        IF(JO.EQ.N) GO TO 11 ! if JO is the last node on airfoil
 C
-C----------------------
+C-------------------------------------------------
 C------- Note: If source is added
+C------- then calculate source contribution to Psi
+C-------------------------------------------------
+
         IF(SIGLIN) THEN
 C
 C------- set up midpoint quantities
@@ -256,10 +261,11 @@ C------- set up midpoint quantities
 C
 C------- calculate source contribution to Psi  for  1-0  half-panel
          DXINV = 1.0/(X1-X0)
-         PSUM = X0*(T0-APAN) - X1*(T1-APAN) + 0.5*YY*(G1-G0)
+         PSUM = X0*(T0-APAN) - X1*(T1-APAN) + 0.5*YY*(G1-G0) ! Psi^sigma Eqn (6) ???
          PDIF = ((X1+X0)*PSUM + RS1*(T1-APAN) - RS0*(T0-APAN)
      &        + (X0-X1)*YY) * DXINV
 C
+C------- sensitivities
          PSX1 =  -(T1-APAN)
          PSX0 =    T0-APAN
          PSYY =  0.5*(G1-G0)
@@ -306,6 +312,7 @@ C------- calculate source contribution to Psi  for  0-2  half-panel
          PDIF = ((X0+X2)*PSUM + RS0*(T0-APAN) - RS2*(T2-APAN)
      &        + (X2-X0)*YY) * DXINV
 C
+C------- Sensistivities
          PSX0 =  -(T0-APAN)
          PSX2 =    T2-APAN
          PSYY =  0.5*(G0-G2)
@@ -349,11 +356,14 @@ C
 C------------
 
 C
+C-------------------------------------------------
 C------ calculate vortex panel contribution to Psi
+C-------------------------------------------------
         DXINV = 1.0/(X1-X2)
-        PSIS = 0.5*X1*G1 - 0.5*X2*G2 + X2 - X1 + YY*(T1-T2)
-        PSID = ((X1+X2)*PSIS + 0.5*(RS2*G2-RS1*G1 + X1*X1-X2*X2))*DXINV
+        PSIS = 0.5*X1*G1 - 0.5*X2*G2 + X2 - X1 + YY*(T1-T2)             ! Psi^gamma+ Eqn (4)
+        PSID = ((X1+X2)*PSIS + 0.5*(RS2*G2-RS1*G1 + X1*X1-X2*X2))*DXINV ! Psi^gamma- Eqn (5)
 C
+C------ Sensistivities
         PSX1 = 0.5*G1
         PSX2 = -.5*G2
         PSYY = T1-T2
@@ -367,8 +377,8 @@ C
         GDIF1 = GAMU(JP,1) - GAMU(JO,1)
         GDIF2 = GAMU(JP,2) - GAMU(JO,2)
 C
-        GSUM = GAM(JP) + GAM(JO)
-        GDIF = GAM(JP) - GAM(JO)
+        GSUM = GAM(JP) + GAM(JO) ! gamma_JP + gamma_JO
+        GDIF = GAM(JP) - GAM(JO) ! gamma_JP - gamma_JO
 C
         PSI = PSI + QOPI*(PSIS*GSUM + PSID*GDIF)
 C
@@ -410,10 +420,12 @@ C
 C
    10 CONTINUE
 C
+C---- Special treatment for TE contributions
    11 CONTINUE
-      PSIG = 0.5*YY*(G1-G2) + X2*(T2-APAN) - X1*(T1-APAN)
+      PSIG = X2*(T2-APAN) - X1*(T1-APAN) + 0.5*YY*(G1-G2)
       PGAM = 0.5*X1*G1 - 0.5*X2*G2 + X2 - X1 + YY*(T1-T2)
 C
+C---- Sensistivities
       PSIGX1 = -(T1-APAN)
       PSIGX2 =   T2-APAN
       PSIGYY = 0.5*(G1-G2)
@@ -434,7 +446,8 @@ C
       GAMTE = -.5*SDS*(GAM(JP) - GAM(JO))
 C
 C---- TE panel contribution to Psi
-      PSI = PSI + HOPI*(PSIG*SIGTE + PGAM*GAMTE) ! HOPI = half of pi
+      PSI = PSI + HOPI*(PSIG*SIGTE + PGAM*GAMTE) ! Finite TE contribution Eqn (3)
+      ! HOPI = half of pi
 C
 C---- dPsi/dGam
       DZDG(JO) = DZDG(JO) - HOPI*PSIG*SCS*0.5
@@ -812,8 +825,8 @@ C
       SUBROUTINE PSWLIN(I,XI,YI,NXI,NYI,PSI,PSI_NI)
 C--------------------------------------------------------------------
 C     Calculates current streamfunction Psi and tangential velocity
-C     Qtan at panel node or wake node I due to freestream and wake
-C     sources Sig.  Also calculates sensitivity vectors dPsi/dSig
+C     Qtan at panel node or wake node I due to **freestream and wake
+C     sources Sig**.  Also calculates sensitivity vectors dPsi/dSig
 C     (DZDM) and dQtan/dSig (DQDM).
 C
 C          Airfoil:  1   < I < N
