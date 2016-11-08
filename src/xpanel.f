@@ -382,7 +382,7 @@ C
         GSUM = GAM(JP) + GAM(JO) ! gamma_JP + gamma_JO
         GDIF = GAM(JP) - GAM(JO) ! gamma_JP - gamma_JO
 C
-        PSI = PSI + QOPI*(PSIS*GSUM + PSID*GDIF)
+        PSI = PSI + QOPI*(PSIS*GSUM + PSID*GDIF) ! accumulate streamfunction Psi
 C
 C------ dPsi/dGam
         DZDG(JO) = DZDG(JO) + QOPI*(PSIS-PSID)
@@ -443,7 +443,7 @@ C---- TE panel source and vortex strengths
       SIGTE2 = 0.5*SCS*(GAMU(JP,2) - GAMU(JO,2))
       GAMTE1 = -.5*SDS*(GAMU(JP,1) - GAMU(JO,1))
       GAMTE2 = -.5*SDS*(GAMU(JP,2) - GAMU(JO,2))
-C
+C     Eqn (2):
       SIGTE = 0.5*SCS*(GAM(JP) - GAM(JO))
       GAMTE = -.5*SDS*(GAM(JP) - GAM(JO))
 C
@@ -1151,7 +1151,7 @@ C
       SUBROUTINE QWCALC
 C---------------------------------------------------------------
 C     Sets inviscid tangential velocity for alpha = 0, 90
-C     on wake due to freestream and airfoil surface vorticity.
+C     **on wake** due to freestream and airfoil surface vorticity.
 C---------------------------------------------------------------
       INCLUDE 'XFOIL.INC'
 C
@@ -1808,6 +1808,9 @@ C
 
 
       SUBROUTINE DSSET
+C---------------------------------------------------------
+C     Sets Dstar from mass defect and Ue
+C---------------------------------------------------------
       INCLUDE 'XFOIL.INC'
 C
       DO 1 IS=1, 2
