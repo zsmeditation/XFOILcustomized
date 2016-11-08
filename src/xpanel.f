@@ -1,8 +1,8 @@
 C***********************************************************************
 C    Module:  xpanel.f
-C 
-C    Copyright (C) 2000 Mark Drela 
-C 
+C
+C    Copyright (C) 2000 Mark Drela
+C
 C    This program is free software; you can redistribute it and/or modify
 C    it under the terms of the GNU General Public License as published by
 C    the Free Software Foundation; either version 2 of the License, or
@@ -24,8 +24,8 @@ C***********************************************************************
 C
 C---- set angles of airfoil panels
       DO 10 I=1, N-1
-        SX = X(I+1) - X(I)
-        SY = Y(I+1) - Y(I)
+        SX = X(I+1) - X(I) !dx
+        SY = Y(I+1) - Y(I) !dy
         IF(SX.EQ.0.0 .AND. SY.EQ.0.0) THEN
           APANEL(I) = ATAN2( -NY(I) , -NX(I) )
         ELSE
@@ -39,15 +39,15 @@ C---- TE panel
       IF(SHARP) THEN
        APANEL(I) = PI
       ELSE
-       SX = X(IP) - X(I)
-       SY = Y(IP) - Y(I)
+       SX = X(IP) - X(I) !dx
+       SY = Y(IP) - Y(I) !dy
        APANEL(I) = ATAN2( -SX , SY ) + PI
       ENDIF
 C
       RETURN
       END
- 
- 
+
+
       SUBROUTINE NCALC(X,Y,S,N,XN,YN)
 C---------------------------------------
 C     Calculates normal unit vector
@@ -62,7 +62,7 @@ C
       DO 10 I=1, N
         SX =  YN(I)
         SY = -XN(I)
-        SMOD = SQRT(SX*SX + SY*SY)
+        SMOD = SQRT(SX*SX + SY*SY) ! length
         IF(SMOD .EQ. 0.0) THEN
          XN(I) = -1.0
          YN(I) = 0.0
@@ -95,11 +95,11 @@ C
       RETURN
       END
 
- 
+
       SUBROUTINE PSILIN(I,XI,YI,NXI,NYI,PSI,PSI_NI,GEOLIN,SIGLIN)
 C-----------------------------------------------------------------------
 C     Calculates current streamfunction Psi at panel node or wake node
-C     I due to freestream and all bound vorticity Gam on the airfoil. 
+C     I due to freestream and all bound vorticity Gam on the airfoil.
 C     Sensitivities of Psi with respect to alpha (Z_ALFA) and inverse
 C     Qspec DOFs (Z_QDOF0,Z_QDOF1) which influence Gam in inverse cases.
 C     Also calculates the sensitivity vector dPsi/dGam (DZDG).
@@ -119,9 +119,9 @@ C-----------------------------------------------------------------------
       LOGICAL GEOLIN,SIGLIN
 C
 C---- distance tolerance for determining if two points are the same
-      SEPS = (S(N)-S(1)) * 1.0E-5
+      SEPS = (S(N)-S(1)) * 1.0E-5 ! separation tolerance
 C
-      IO = I
+      IO = I ! index of the node to evaluate streamfunction at
 C
       COSA = COS(ALFA)
       SINA = SIN(ALFA)
@@ -144,7 +144,7 @@ C
       Z_QDOF2 = 0.
       Z_QDOF3 = 0.
 C
-      PSI    = 0.
+      PSI    = 0. ! stream function
       PSI_NI = 0.
 C
       QTAN1 = 0.
@@ -159,7 +159,7 @@ C
        SDS = ASTE/DSTE
       ENDIF
 C
-      DO 10 JO=1, N
+      DO 10 JO=1, N ! loop over nodes on airfoil
         JP = JO+1
 C
         JM = JO-1
@@ -171,17 +171,17 @@ C
          JQ = JP
         ELSE IF(JO.EQ.N) THEN
          JP = 1
-         IF((X(JO)-X(JP))**2 + (Y(JO)-Y(JP))**2 .LT. SEPS**2) GO TO 12
+         IF((X(JO)-X(JP))**2 + (Y(JO)-Y(JP))**2 .LT. SEPS**2) GO TO 12 ! if TE thickness is negligible
         ENDIF
 C
-        DSO = SQRT((X(JO)-X(JP))**2 + (Y(JO)-Y(JP))**2)
+        DSO = SQRT((X(JO)-X(JP))**2 + (Y(JO)-Y(JP))**2) ! panel length
 C
 C------ skip null panel
         IF(DSO .EQ. 0.0) GO TO 10
 C
         DSIO = 1.0 / DSO
 C
-        APAN = APANEL(JO)
+        APAN = APANEL(JO) ! panel angle
 C
         RX1 = XI - X(JO)
         RY1 = YI - Y(JO)
@@ -191,12 +191,12 @@ C
         SX = (X(JP) - X(JO)) * DSIO
         SY = (Y(JP) - Y(JO)) * DSIO
 C
-        X1 = SX*RX1 + SY*RY1
-        X2 = SX*RX2 + SY*RY2
-        YY = SX*RY1 - SY*RX1
+        X1 = SX*RX1 + SY*RY1 ! panel reference coordinate x_1
+        X2 = SX*RX2 + SY*RY2 ! panel reference coordinate x_2
+        YY = SX*RY1 - SY*RX1 ! panel reference coordinate y = y_1 = y_2
 C
-        RS1 = RX1*RX1 + RY1*RY1
-        RS2 = RX2*RX2 + RY2*RY2
+        RS1 = RX1*RX1 + RY1*RY1 ! distance r_1
+        RS2 = RX2*RX2 + RY2*RY2 ! distance r_2
 C
 C------ set reflection flag SGN to avoid branch problems with arctan
         IF(IO.GE.1 .AND. IO.LE.N) THEN
@@ -209,8 +209,8 @@ C------- make sure arctan falls between  -/+  Pi/2
 C
 C------ set log(r^2) and arctan(x/y), correcting for reflection if any
         IF(IO.NE.JO .AND. RS1.GT.0.0) THEN
-         G1 = LOG(RS1)
-         T1 = ATAN2(SGN*X1,SGN*YY) + (0.5 - 0.5*SGN)*PI
+         G1 = LOG(RS1) ! ln(r_1^2)
+         T1 = ATAN2(SGN*X1,SGN*YY) + (0.5 - 0.5*SGN)*PI ! theta_1
         ELSE
          G1 = 0.0
          T1 = 0.0
@@ -246,7 +246,7 @@ C
 C
 C----------------------
 C------- Note: If source is added
-        IF(SIGLIN) THEN 
+        IF(SIGLIN) THEN
 C
 C------- set up midpoint quantities
          X0 = 0.5*(X1+X2)
@@ -434,7 +434,7 @@ C
       GAMTE = -.5*SDS*(GAM(JP) - GAM(JO))
 C
 C---- TE panel contribution to Psi
-      PSI = PSI + HOPI*(PSIG*SIGTE + PGAM*GAMTE)
+      PSI = PSI + HOPI*(PSIG*SIGTE + PGAM*GAMTE) ! HOPI = half of pi
 C
 C---- dPsi/dGam
       DZDG(JO) = DZDG(JO) - HOPI*PSIG*SCS*0.5
@@ -739,9 +739,10 @@ C
    20 CONTINUE
 C
    21 CONTINUE
-      PSIG = 0.5*YY*(G1-G2) + X2*(T2-APAN) - X1*(T1-APAN)
-      PGAM = 0.5*X1*G1 - 0.5*X2*G2 + X2 - X1 + YY*(T1-T2)
+      PSIG = 0.5*YY*(G1-G2) + X2*(T2-APAN) - X1*(T1-APAN) ! Psi^sigma in Eqn (6)
+      PGAM = 0.5*X1*G1 - 0.5*X2*G2 + X2 - X1 + YY*(T1-T2) ! Psi^gamma+ in Eqn (4)
 C
+C---- Sensistivities
       PSIGX1 = -(T1-APAN)
       PSIGX2 =   T2-APAN
       PSIGYY = 0.5*(G1-G2)
@@ -1065,7 +1066,7 @@ C---- set up Kutta condition (no direct source influence)
    32 CONTINUE
 C
       IF(SHARP) THEN
-C----- set zero internal velocity in TE corner 
+C----- set zero internal velocity in TE corner
 C
 C----- set TE bisector angle
        AG1 = ATAN2(-YP(1),-XP(1)    )
@@ -1226,7 +1227,7 @@ C
         DO 710 J=1, N
           CIJ(IW,J) = DQDG(J)
   710   CONTINUE
-C  
+C
         DO 720 J=1, N
           DIJ(I,J) = DQDM(J)
   720   CONTINUE
@@ -1277,7 +1278,7 @@ C
 
       SUBROUTINE XYWAKE
 C-----------------------------------------------------
-C     Sets wake coordinate array for current surface 
+C     Sets wake coordinate array for current surface
 C     vorticity and/or mass source distributions.
 C-----------------------------------------------------
       INCLUDE 'XFOIL.INC'
@@ -1364,7 +1365,7 @@ C
 
       SUBROUTINE STFIND
 C-----------------------------------------
-C     Locates stagnation point arc length 
+C     Locates stagnation point arc length
 C     location SST and panel index IST.
 C-----------------------------------------
       INCLUDE 'XFOIL.INC'
@@ -1677,7 +1678,7 @@ C------ move top side BL variables downstream
           THET(IBL,1) = THET(IBL-IDIF,1)
           DSTR(IBL,1) = DSTR(IBL-IDIF,1)
           UEDG(IBL,1) = UEDG(IBL-IDIF,1)
-  110   CONTINUE            
+  110   CONTINUE
 C
 C------ set BL variables between old and new stagnation point
         DUDX = UEDG(IDIF+2,1)/XSSI(IDIF+2,1)
@@ -1694,7 +1695,7 @@ C------ move bottom side BL variables upstream
           THET(IBL,2) = THET(IBL+IDIF,2)
           DSTR(IBL,2) = DSTR(IBL+IDIF,2)
           UEDG(IBL,2) = UEDG(IBL+IDIF,2)
-  120   CONTINUE            
+  120   CONTINUE
 C
        ELSE
 C------ increase in number of points on bottom side (IS=2)
@@ -1709,13 +1710,13 @@ C------ move bottom side BL variables downstream
           THET(IBL,2) = THET(IBL-IDIF,2)
           DSTR(IBL,2) = DSTR(IBL-IDIF,2)
           UEDG(IBL,2) = UEDG(IBL-IDIF,2)
-  210   CONTINUE            
+  210   CONTINUE
 C
 C------ set BL variables between old and new stagnation point
         DUDX = UEDG(IDIF+2,2)/XSSI(IDIF+2,2)
 
 
-c        write(*,*) 'idif Ue xi dudx', 
+c        write(*,*) 'idif Ue xi dudx',
 c     &    idif, UEDG(idif+2,2), xssi(idif+2,2), dudx
 
         DO 215 IBL=IDIF+1, 2, -1
@@ -1734,7 +1735,7 @@ C------ move top side BL variables upstream
           THET(IBL,1) = THET(IBL+IDIF,1)
           DSTR(IBL,1) = DSTR(IBL+IDIF,1)
           UEDG(IBL,1) = UEDG(IBL+IDIF,1)
-  220   CONTINUE            
+  220   CONTINUE
        ENDIF
 C
 C----- tweak Ue so it's not zero, in case stag. point is right on node
