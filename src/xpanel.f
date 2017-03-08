@@ -26,7 +26,7 @@ C---- set angles of airfoil panels
       DO 10 I=1, N-1
         SX = X(I+1) - X(I) !dx
         SY = Y(I+1) - Y(I) !dy
-        IF(SX.EQ.0.0 .AND. SY.EQ.0.0) THEN
+        IF(SX.EQ.0.0 .AND. SY.EQ.0.0) THEN ! null panel
           APANEL(I) = ATAN2( -NY(I) , -NX(I) )
         ELSE
           APANEL(I) = ATAN2( SX , -SY )
@@ -36,7 +36,7 @@ C
 C---- TE panel
       I = N
       IP = 1
-      IF(SHARP) THEN
+      IF(SHARP) THEN ! sharp TE
        APANEL(I) = PI
       ELSE
        SX = X(IP) - X(I) !dx
@@ -113,6 +113,7 @@ C     is calculated, where n is the normal motion of the jth node.
 C
 C          Airfoil:  1   < I < N
 C          Wake:     N+1 < I < N+NW
+C          N nodes on airfoil and NW nodes in wake
 C-----------------------------------------------------------------------
       INCLUDE 'XFOIL.INC'
       REAL NXO, NYO, NXP, NYP, NXI, NYI
@@ -144,13 +145,14 @@ C
       Z_QDOF2 = 0.
       Z_QDOF3 = 0.
 C
-      PSI    = 0. ! stream function
+      PSI    = 0. ! streamfunction
       PSI_NI = 0.
 C
       QTAN1 = 0.
       QTAN2 = 0.
       QTANM = 0.
 C
+c---- Definition: TE panel direction vector s^hat = SCS n^hat + SDS t^hat, where t^hat is bisector of TE with its normal vector n^hat
       IF(SHARP) THEN
        SCS = 1.0
        SDS = 0.0
@@ -162,15 +164,15 @@ C
 C---- loop over nodes on airfoil
       DO 10 JO=1, N
         JP = JO+1
-C
         JM = JO-1
         JQ = JP+1
+C---- general panel configuration: JM--JO--JP--JQ where JP-JO is main panel and JQ-JP/J0-JM are auxiliary half panels
 C
-        IF(JO.EQ.1) THEN
+        IF(JO.EQ.1) THEN ! first panel: JO=1
          JM = JO
-        ELSE IF(JO.EQ.N-1) THEN
+       ELSE IF(JO.EQ.N-1) THEN ! last panel: JO=N-1
          JQ = JP
-        ELSE IF(JO.EQ.N) THEN
+       ELSE IF(JO.EQ.N) THEN ! TE panel: JO=N
          JP = 1
          IF((X(JO)-X(JP))**2 + (Y(JO)-Y(JP))**2 .LT. SEPS**2) GO TO 12 ! if TE thickness is negligible
         ENDIF
@@ -178,7 +180,7 @@ C
         DSO = SQRT((X(JO)-X(JP))**2 + (Y(JO)-Y(JP))**2) ! panel length
 C
 C------ skip null panel
-        IF(DSO .EQ. 0.0) GO TO 10
+        IF(DSO .EQ. 0.0) GO TO 10 ! jump to the next iteration in this for loop
 C
         DSIO = 1.0 / DSO
 C
@@ -202,7 +204,7 @@ C
         RS2 = RX2*RX2 + RY2*RY2 ! r_2^2
 C
 C------ set reflection flag SGN to avoid branch problems with arctan
-        IF(IO.GE.1 .AND. IO.LE.N) THEN
+        IF(IO.GE.1 .AND. IO.LE.N) THEN ! evaluation node IO is on airfoil
 C------- no problem on airfoil surface
          SGN = 1.0
         ELSE
@@ -246,13 +248,12 @@ C
          YYP =-((RX1-X1*SY)*NYP - (RY1+X1*SX)*NXP)*DSIO
         ENDIF
 C
-        IF(JO.EQ.N) GO TO 11 ! if JO is the last node on airfoil
+        IF(JO.EQ.N) GO TO 11 ! if JO is the last node on airfoil, jumps to special treatment for TE panel
 C
 C-------------------------------------------------
 C------- Note: If source is added
 C------- then calculate source contribution to Psi
 C-------------------------------------------------
-
         IF(SIGLIN) THEN
 C
 C------- set up midpoint quantities
@@ -324,7 +325,7 @@ C
          PDYY = ((X0+X2)*PSYY + 2.0*(X2-X0 + YY*(T0-T2))      ) * DXINV
 C
          DSP = SQRT((X(JQ)-X(JO))**2 + (Y(JQ)-Y(JO))**2)
-         DSIP = 1.0/DSP
+         DSI  P = 1.0/DSP
 C
 CCC         SIG2 = (SIG(JQ) - SIG(JO))*DSIP
 CCC         SIG0 = (SIG(JP) - SIG(JO))*DSIO
@@ -382,7 +383,7 @@ C
         GSUM = GAM(JP) + GAM(JO) ! gamma_JP + gamma_JO
         GDIF = GAM(JP) - GAM(JO) ! gamma_JP - gamma_JO
 C
-        PSI = PSI + QOPI*(PSIS*GSUM + PSID*GDIF) ! accumulate streamfunction Psi
+        PSI = PSI + QOPI*(PSIS*GSUM + PSID*GDIF) ! accumulate vortex contribution to streamfunction Psi as in Eqn (3)
 C
 C------ dPsi/dGam
         DZDG(JO) = DZDG(JO) + QOPI*(PSIS-PSID)
@@ -424,8 +425,8 @@ C
 C
 C---- Special treatment for TE contributions
    11 CONTINUE
-      PSIG = X2*(T2-APAN) - X1*(T1-APAN) + 0.5*YY*(G1-G2)
-      PGAM = 0.5*X1*G1 - 0.5*X2*G2 + X2 - X1 + YY*(T1-T2)
+      PSIG = X2*(T2-APAN) - X1*(T1-APAN) + 0.5*YY*(G1-G2) ! Eqn (6)
+      PGAM = 0.5*X1*G1 - 0.5*X2*G2 + X2 - X1 + YY*(T1-T2) ! Eqn (4)
 C
 C---- Sensistivities
       PSIGX1 = -(T1-APAN)
@@ -448,7 +449,7 @@ C     Eqn (2):
       GAMTE = -.5*SDS*(GAM(JP) - GAM(JO))
 C
 C---- TE panel contribution to Psi
-      PSI = PSI + HOPI*(PSIG*SIGTE + PGAM*GAMTE) ! Finite TE contribution Eqn (3)
+      PSI = PSI + HOPI*(PSIG*SIGTE + PGAM*GAMTE) ! Finite TE contribution in Eqn (3)
       ! HOPI = half of pi
 C
 C---- dPsi/dGam
@@ -508,7 +509,7 @@ C
 C---- dPsi/dalfa
       Z_ALFA = Z_ALFA - QINF*(SINA*YI + COSA*XI)
 C
-      IF(.NOT.LIMAGE) RETURN
+      IF(.NOT.LIMAGE) RETURN ! return if image airfoil is not present
 C
 C
 C
