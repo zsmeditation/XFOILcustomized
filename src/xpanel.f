@@ -30,6 +30,8 @@ C---- set angles of airfoil panels
           APANEL(I) = ATAN2( -NY(I) , -NX(I) )
         ELSE
           APANEL(I) = ATAN2( SX , -SY )
+CCC       APANEL(.) defined as the vector angle of normal vector which is panel directional vector [SX,SY]
+CCC       rotated CCW by 90 degrees
         ENDIF
    10 CONTINUE
 C
@@ -105,8 +107,8 @@ C     Qspec DOFs (Z_QDOF0,Z_QDOF1) which influence Gam in inverse cases.
 C     Also calculates the sensitivity vector dPsi/dGam (DZDG).
 C
 C     If SIGLIN=True, then Psi includes the effects of the viscous
-C     source distribution Sig and the sensitivity vector dPsi/dSig
-C     (DZDM) is calculated.
+C     source distribution Sig (on airfoil) and the sensitivity vector
+C     dPsi/dSig (DZDM) is calculated.
 C
 C     If GEOLIN=True, then the geometric sensitivity vector dPsi/dn
 C     is calculated, where n is the normal motion of the jth node.
@@ -166,13 +168,13 @@ C---- loop over nodes on airfoil
         JP = JO+1
         JM = JO-1
         JQ = JP+1
-C---- general panel configuration: JM--JO--JP--JQ where JP-JO is main panel and JQ-JP/J0-JM are auxiliary half panels
+C---- general panel configuration: JM--JO--JP--JQ where JO-JP is main panel and JP-JQ/JM-JO are auxiliary half panels
 C
         IF(JO.EQ.1) THEN ! first panel: JO=1
          JM = JO
-       ELSE IF(JO.EQ.N-1) THEN ! last panel: JO=N-1
+        ELSE IF(JO.EQ.N-1) THEN ! last panel: JO=N-1
          JQ = JP
-       ELSE IF(JO.EQ.N) THEN ! TE panel: JO=N
+        ELSE IF(JO.EQ.N) THEN ! TE correction panel: JO=N
          JP = 1
          IF((X(JO)-X(JP))**2 + (Y(JO)-Y(JP))**2 .LT. SEPS**2) GO TO 12 ! if TE thickness is negligible
         ENDIF
@@ -208,7 +210,7 @@ C------ set reflection flag SGN to avoid branch problems with arctan
 C------- no problem on airfoil surface
          SGN = 1.0
         ELSE
-C------- make sure arctan falls between  -/+  Pi/2
+C------- make sure arctan falls between -/+ Pi/2
          SGN = SIGN(1.0,YY)
         ENDIF
 C
@@ -230,7 +232,8 @@ C
         ENDIF
 C
 C------ Sensitivities
-        X1I = SX*NXI + SY*NYI
+C       ni is the normal vector at node i
+        X1I = SX*NXI + SY*NYI ! d(X1)/d(ni) := grad(X1) dot normal vector
         X2I = SX*NXI + SY*NYI
         YYI = SX*NYI - SY*NXI
 C
@@ -262,25 +265,26 @@ C------- set up midpoint quantities
          G0 = LOG(RS0)
          T0 = ATAN2(SGN*X0,SGN*YY) + (0.5 - 0.5*SGN)*PI
 C
-C------- calculate source contribution to Psi  for  1-0  half-panel
+C------- calculate source contribution to Psi for 1-0  half-panel
          DXINV = 1.0/(X1-X0)
          PSUM = X0*(T0-APAN) - X1*(T1-APAN) + 0.5*YY*(G1-G0) ! Psi^sigma Eqn (6) ???
          PDIF = ((X1+X0)*PSUM + RS1*(T1-APAN) - RS0*(T0-APAN)
      &        + (X0-X1)*YY) * DXINV
 C
 C------- sensitivities
-         PSX1 =  -(T1-APAN)
-         PSX0 =    T0-APAN
-         PSYY =  0.5*(G1-G0)
+         PSX1 =  -(T1-APAN)  !d(PSUM)/d(X1)
+         PSX0 =    T0-APAN   !d(PSUM)/d(X0)
+         PSYY =  0.5*(G1-G0) !d(PSUM)/d(YY)
 C
-         PDX1 = ((X1+X0)*PSX1 + PSUM + 2.0*X1*(T1-APAN) - PDIF) * DXINV
+         PDX1 = ((X1+X0)*PSX1 + PSUM + 2.0*X1*(T1-APAN) - PDIF) * DXINV !d(PDIF)/d(X1)
          PDX0 = ((X1+X0)*PSX0 + PSUM - 2.0*X0*(T0-APAN) + PDIF) * DXINV
          PDYY = ((X1+X0)*PSYY + 2.0*(X0-X1 + YY*(T1-T0))      ) * DXINV
 C
+C------- add to streamfunction
          DSM = SQRT((X(JP)-X(JM))**2 + (Y(JP)-Y(JM))**2)
          DSIM = 1.0/DSM
 C
-CCC      SIG0 = (SIG(JP) - SIG(JO))*DSIO
+CCC      SIG0 = (SIG(JP) - SIG(JO))*DSIO ! Note that SIG(.) is defined as mass defect whereas SIG0 is source strength
 CCC      SIG1 = (SIG(JP) - SIG(JM))*DSIM
 CCC      SSUM = SIG0 + SIG1
 CCC      SDIF = SIG0 - SIG1
@@ -297,8 +301,8 @@ C------- dPsi/dm
      &                                          + PDIF*(DSIO-DSIM))
 C
 C------- dPsi/dni
-         PSNI = PSX1*X1I + PSX0*(X1I+X2I)*0.5 + PSYY*YYI
-         PDNI = PDX1*X1I + PDX0*(X1I+X2I)*0.5 + PDYY*YYI
+         PSNI = PSX1*X1I + PSX0*(X1I+X2I)*0.5 + PSYY*YYI !d(PSUM)/d(n)
+         PDNI = PDX1*X1I + PDX0*(X1I+X2I)*0.5 + PDYY*YYI !d(PDIF)/d(n)
          PSI_NI = PSI_NI + QOPI*(PSNI*SSUM + PDNI*SDIF)
 C
          QTANM = QTANM + QOPI*(PSNI*SSUM + PDNI*SDIF)
@@ -325,7 +329,7 @@ C
          PDYY = ((X0+X2)*PSYY + 2.0*(X2-X0 + YY*(T0-T2))      ) * DXINV
 C
          DSP = SQRT((X(JQ)-X(JO))**2 + (Y(JQ)-Y(JO))**2)
-         DSI  P = 1.0/DSP
+         DSIP = 1.0/DSP
 C
 CCC         SIG2 = (SIG(JQ) - SIG(JO))*DSIP
 CCC         SIG0 = (SIG(JP) - SIG(JO))*DSIO
@@ -367,11 +371,11 @@ C-------------------------------------------------
         PSID = ((X1+X2)*PSIS + 0.5*(RS2*G2-RS1*G1 + X1*X1-X2*X2))*DXINV ! Psi^gamma- Eqn (5)
 C
 C------ Sensistivities
-        PSX1 = 0.5*G1
+        PSX1 = 0.5*G1 ! d(PSIS)/d(X1)
         PSX2 = -.5*G2
         PSYY = T1-T2
 C
-        PDX1 = ((X1+X2)*PSX1 + PSIS - X1*G1 - PSID)*DXINV
+        PDX1 = ((X1+X2)*PSX1 + PSIS - X1*G1 - PSID)*DXINV ! d(PSID)/d(X1)
         PDX2 = ((X1+X2)*PSX2 + PSIS + X2*G2 + PSID)*DXINV
         PDYY = ((X1+X2)*PSYY - YY*(G1-G2)         )*DXINV
 C
@@ -509,7 +513,7 @@ C
 C---- dPsi/dalfa
       Z_ALFA = Z_ALFA - QINF*(SINA*YI + COSA*XI)
 C
-      IF(.NOT.LIMAGE) RETURN ! return if image airfoil is not present
+      IF(.NOT.LIMAGE) RETURN ! return, if image airfoil is not present
 C
 C
 C
@@ -883,7 +887,7 @@ C
         RS1 = RX1*RX1 + RY1*RY1
         RS2 = RX2*RX2 + RY2*RY2
 C
-        IF(IO.GE.N+1 .AND. IO.LE.N+NW) THEN
+        IF(IO.GE.N+1 .AND. IO.LE.N+NW) THEN ! Note that this is different from PSILIN
          SGN = 1.0
         ELSE
          SGN = SIGN(1.0,YY)
@@ -891,7 +895,7 @@ C
 C
         IF(IO.NE.JO .AND. RS1.GT.0.0) THEN
          G1 = LOG(RS1)
-         T1 = ATAN2(SGN*X1,SGN*YY) - (0.5 - 0.5*SGN)*PI
+         T1 = ATAN2(SGN*X1,SGN*YY) - (0.5 - 0.5*SGN)*PI ! Note that this is different from PSILIN
         ELSE
          G1 = 0.0
          T1 = 0.0
@@ -899,7 +903,7 @@ C
 C
         IF(IO.NE.JP .AND. RS2.GT.0.0) THEN
          G2 = LOG(RS2)
-         T2 = ATAN2(SGN*X2,SGN*YY) - (0.5 - 0.5*SGN)*PI
+         T2 = ATAN2(SGN*X2,SGN*YY) - (0.5 - 0.5*SGN)*PI ! Note that this is different from PSILIN
         ELSE
          G2 = 0.0
          T2 = 0.0
@@ -1049,7 +1053,7 @@ C------ dRes/dGamma
         DO 201 J=1, N
           AIJ(I,J) = DZDG(J)
   201   CONTINUE
-C
+C------ - dRes/dm
         DO 202 J=1, N
           BIJ(I,J) = -DZDM(J)
   202   CONTINUE
@@ -1096,7 +1100,7 @@ C----- minimum panel length adjacent to TE
        DS2 = SQRT( (X(N)-X(N-1))**2 + (Y(N)-Y(N-1))**2 )
        DSMIN = MIN( DS1 , DS2 )
 C
-C----- control point on bisector just ahead of TE point
+C----- control point on bisector just ahead of TE point and inside airfoil
        XBIS = XTE - BWT*DSMIN*CBIS
        YBIS = YTE - BWT*DSMIN*SBIS
 ccc       write(*,*) xbis, ybis
