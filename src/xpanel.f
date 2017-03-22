@@ -30,8 +30,8 @@ C---- set angles of airfoil panels
           APANEL(I) = ATAN2( -NY(I) , -NX(I) )
         ELSE
           APANEL(I) = ATAN2( SX , -SY )
-CCC       APANEL(.) defined as the vector angle of normal vector which is panel directional vector [SX,SY]
-CCC       rotated CCW by 90 degrees
+CCC       APANEL(.) defined as the vector angle of normal vector [-SY,SX] which is panel directional vector
+CCC       [SX,SY] rotated CCW by 90 degrees
         ENDIF
    10 CONTINUE
 C
@@ -188,12 +188,12 @@ C
 C
         APAN = APANEL(JO) ! panel angle
 C
-        RX1 = XI - X(JO)
+        RX1 = XI - X(JO) ! relative position coordinates
         RY1 = YI - Y(JO)
         RX2 = XI - X(JP)
         RY2 = YI - Y(JP)
 C
-        SX = (X(JP) - X(JO)) * DSIO
+        SX = (X(JP) - X(JO)) * DSIO ! panel directional vector coordinates
         SY = (Y(JP) - Y(JO)) * DSIO
 C
         X1 = SX*RX1 + SY*RY1 ! panel reference coordinate x_1
@@ -1028,6 +1028,7 @@ C-    (fraction of smaller panel length adjacent to TE)
 C
       WRITE(*,*) 'Calculating unit vorticity distributions ...'
 C
+C---- reset solution
       DO 10 I=1, N
         GAM(I) = 0.
         GAMU(I,1) = 0.
@@ -1085,6 +1086,7 @@ C---- set up Kutta condition (no direct source influence)
         BIJ(N+1,J) = 0.
    32 CONTINUE
 C
+C---- Special treatment for sharp trailing edge
       IF(SHARP) THEN
 C----- set zero internal velocity in TE corner
 C
@@ -1184,29 +1186,30 @@ C-----------------------------------------------------
 C
       WRITE(*,*) 'Calculating source influence matrix ...'
 C
+C**** Compute dQtan/dSig matrix for the airfoil if it has NOT been computed, i.e. influences of source
+CCC   (both airfoil and wake) on airfoil surface velocities
       IF(.NOT.LADIJ) THEN
 C
-C----- calculate source influence matrix for airfoil surface if it doesn't exist
        DO 10 J=1, N
 C
 C------- multiply each dPsi/Sig vector by inverse of factored dPsi/dGam matrix
-         CALL BAKSUB(IQX,N+1,AIJ,AIJPIV,BIJ(1,J))
+         CALL BAKSUB(IQX,N+1,AIJ,AIJPIV,BIJ(1,J)) ! BIJ = AIJ^(-1) * BIJ
 C
-C------- store resulting dGam/dSig = dQtan/dSig vector
+C------- store resulting dQtan/dSig = dGam/dSig vector
          DO 105 I=1, N
            DIJ(I,J) = BIJ(I,J)
   105    CONTINUE
 C
    10  CONTINUE
-       LADIJ = .TRUE.
+       LADIJ = .TRUE. ! dQtan/dSig matrix for the airfoil has been computed
 C
       ENDIF
 C
-C---- set up coefficient matrix of dPsi/dm on airfoil surface
+C---- set up coefficient matrix of dPsi/dm for airfoil streamfunction and wake mass defect m
       DO 20 I=1, N
         CALL PSWLIN(I,X(I),Y(I),NX(I),NY(I),PSI,PSI_N)
         DO 202 J=N+1, N+NW
-          BIJ(I,J) = -DZDM(J)
+          BIJ(I,J) = -DZDM(J) ! influence of wake mass defect m on airfoil Psi
   202   CONTINUE
    20 CONTINUE
 C
@@ -1215,16 +1218,17 @@ C---- set up Kutta condition (no direct source influence)
         BIJ(N+1,J) = 0.
    32 CONTINUE
 C
-C---- sharp TE gamma extrapolation also has no source influence
+C---- sharp TE treatment (either gamma extrapolation as in XFOIL paper, or setting internal velocity to zero
+CCC   inside airfoil ahead of TE) also has no source influence
       IF(SHARP) THEN
        DO 34 J=N+1, N+NW
          BIJ(N,J) = 0.
    34  CONTINUE
       ENDIF
 C
-C---- multiply by inverse of factored dPsi/dGam matrix
+C---- multiply dPsi/dm by inverse of factored dPsi/dGam matrix
       DO 40 J=N+1, N+NW
-        CALL BAKSUB(IQX,N+1,AIJ,AIJPIV,BIJ(1,J))
+        CALL BAKSUB(IQX,N+1,AIJ,AIJPIV,BIJ(1,J)) ! BIJ = AIJ^(-1) * BIJ
    40 CONTINUE
 C
 C---- set the source influence matrix for the wake sources
@@ -1245,18 +1249,18 @@ C------ airfoil contribution at wake panel node
         CALL PSILIN(I,X(I),Y(I),NX(I),NY(I),PSI,PSI_N,.FALSE.,.TRUE.)
 C
         DO 710 J=1, N
-          CIJ(IW,J) = DQDG(J)
+          CIJ(IW,J) = DQDG(J) ! d(Qtan)/d(Gamma) for wake Qtan and airfoil Gamma
   710   CONTINUE
 C
         DO 720 J=1, N
-          DIJ(I,J) = DQDM(J)
+          DIJ(I,J) = DQDM(J) ! d(Qtan)/d(m) for wake Qtan and airfoil mass defect
   720   CONTINUE
 C
 C------ wake contribution
         CALL PSWLIN(I,X(I),Y(I),NX(I),NY(I),PSI,PSI_N)
 C
         DO 730 J=N+1, N+NW
-          DIJ(I,J) = DQDM(J)
+          DIJ(I,J) = DQDM(J) ! d(Qtan)/d(m) for wake Qtan and wake mass defect
   730   CONTINUE
 C
    70 CONTINUE
@@ -1269,7 +1273,7 @@ C------ airfoil surface source contribution first
         DO 810 J=1, N
           SUM = 0.
           DO 8100 K=1, N
-            SUM = SUM + CIJ(IW,K)*DIJ(K,J)
+            SUM = SUM + CIJ(IW,K)*DIJ(K,J) ! d(Qtan)/d(Gamma) * d(Qtan)/d(m) where Qtan = Gamma on airfoil
  8100     CONTINUE
           DIJ(I,J) = DIJ(I,J) + SUM
   810   CONTINUE
@@ -1278,7 +1282,7 @@ C------ wake source contribution next
         DO 820 J=N+1, N+NW
           SUM = 0.
           DO 8200 K=1, N
-            SUM = SUM + CIJ(IW,K)*BIJ(K,J)
+            SUM = SUM + CIJ(IW,K)*BIJ(K,J) ! d(Qtan)/d(Gamma) * d(Gamma)/d(m)
  8200     CONTINUE
           DIJ(I,J) = DIJ(I,J) + SUM
   820   CONTINUE
@@ -1290,7 +1294,7 @@ C---- make sure first wake point has same velocity as trailing edge
         DIJ(N+1,J) = DIJ(N,J)
    90 CONTINUE
 C
-      LWDIJ = .TRUE.
+      LWDIJ = .TRUE. ! dQtan/dSig matrix for the wake has now been computed
 C
       RETURN
       END
