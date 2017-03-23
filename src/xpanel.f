@@ -196,9 +196,9 @@ C
         SX = (X(JP) - X(JO)) * DSIO ! panel directional vector coordinates
         SY = (Y(JP) - Y(JO)) * DSIO
 C
-        X1 = SX*RX1 + SY*RY1 ! panel reference coordinate x_1
-        X2 = SX*RX2 + SY*RY2 ! panel reference coordinate x_2
-        YY = SX*RY1 - SY*RX1 ! panel reference coordinate y = y_1 = y_2
+        X1 =  SX*RX1 + SY*RY1 ! panel reference coordinate x_1
+        X2 =  SX*RX2 + SY*RY2 ! panel reference coordinate x_2
+        YY = -SY*RX1 + SX*RY1 ! panel reference coordinate y = y_1 = y_2
         ! note that YY = (RX1,RY1) . (-SY,SX)
         ! where (-SY,SX) is obtained by rotating (SX,SY) CCW by pi/2 radians
 C
