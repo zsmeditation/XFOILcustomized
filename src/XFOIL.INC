@@ -20,7 +20,7 @@ C
 C---- include polar variable indexing parameters
       INCLUDE 'PINDEX.INC'
 C
-      PARAMETER (IQX=1200, IPX=5, ISX=2)
+      PARAMETER (IQX=5000, IPX=5, ISX=2)
       PARAMETER (IWX=IQX/8+2)
       PARAMETER (IBX=4*IQX)
       PARAMETER (IZX=IQX+IWX)

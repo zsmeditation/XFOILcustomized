@@ -187,7 +187,7 @@ C     *******************************************************
 C
       DIMENSION A(NSIZ,NSIZ), INDX(NSIZ)
 C
-      PARAMETER (NVX=1200)
+      PARAMETER (NVX=5000)
       DIMENSION VV(NVX)
 C
       IF(N.GT.NVX) STOP 'LUDCMP: Array overflow. Increase NVX.'
