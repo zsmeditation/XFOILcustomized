@@ -516,7 +516,7 @@ C---- overlay inviscid Cp on viscous Cp(x) plot
 
 C---- grid and no symbols are to be used on BL variable plots
       LBLGRD = .TRUE.
-      LBLSYM = .FALSE.
+      LBLSYM = .FALSE. ! Corresponds to the flag: "SYMB   Toggle node-symbol plotting" in BL variable plotting
 C
 C---- buffer and current airfoil flap hinge coordinates
       XBF = 0.0

@@ -1937,7 +1937,7 @@ C
        WRITE(LU,1000)
      & '#  (1)s          (2)x          (3)y          (4)Ue/Vinf    ',
      & '(5)Dstar      (6)Theta      (7)Cf         (8)H          ',
-     & '(9)H*         (10)CDIS     (11)Ctau'
+     & '(9)H*         (10)CDIS     (11)Ctau       (12)Ctaueq'
 C    &,'         Uinv/Vinf'
 C    &,'   P         m          K          tau        Di'
 C          0.00000000E+00  0.10000000E+01  0.42000000E-03  0.99214280E+00  0.73712695E-02  0.23842710E-02  0.74198645E-03  0.30916240E+01  0.15353862E+01
@@ -1972,7 +1972,8 @@ C
           TS = TSTR(IBL,IS)
           CF =  TAU(IBL,IS)/(0.5*QINF**2)
           CDIS = DIS(IBL,IS)/(QINF**3)
-          CT = CTAU(IBL,IS)
+          CT = CTAU(IBL,IS)**2 ! turbulent shear stress coefficient
+          CTEQ = CTQ(IBL,IS)**2 ! maximum shear stress coefficient (equilibrium flows)
           IF(TH.EQ.0.0) THEN
            H = 1.0
            HS = 1.0
@@ -1995,11 +1996,11 @@ C
 C
         IF(KDELIM.EQ.0) THEN  ! customized output
          WRITE(LU,8500) S(I), X(I), Y(I), UE, DS, TH, CF, HK, HS
-     &    , CDIS, CT
+     &    , CDIS, CT, CTEQ
 C    &    , UI
 C    &    , TH*UE**2, DS*UE, TS*UE**3
 C    &    , TAU(IBL,IS), DIS(IBL,IS), cdis
- 8500    FORMAT(1X, 11E14.6)
+ 8500    FORMAT(1X, 12E14.6)
 C    &       f10.4, 3f10.5, 2f10.6, f10.6, F10.6 )
 C
         ELSE
@@ -2031,7 +2032,8 @@ C----- Dump wake results
           HS = TS/TH
           CF = 0.
           CDIS = DIS(IBL,IS)/(QINF**3)
-          CT = CTAU(IBL,IS)
+          CT = CTAU(IBL,IS)**2 ! turbulent shear stress coefficient
+          CTEQ = CTQ(IBL,IS)**2 ! maximum shear stress coefficient (equilibrium flows)
           UI = UEDG(IBL,IS)
           UE = (UI/QINF)*(1.0-TKLAM) / (1.0 - TKLAM*(UI/QINF)**2)
           AMSQ = UE*UE*HSTINV / (GAMM1*(1.0 - 0.5*UE*UE*HSTINV))
@@ -2039,7 +2041,7 @@ C----- Dump wake results
 C
           IF(KDELIM.EQ.0) THEN
            WRITE(LU,8500) S(I), X(I), Y(I), UE, DS, TH, CF, HK, HS
-     &    , CDIS, CT
+     &    , CDIS, CT, CTEQ
 C    &    , UI
 C
           ELSE

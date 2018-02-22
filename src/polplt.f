@@ -1,8 +1,8 @@
 C***********************************************************************
 C    Module:  polplt.f
-C 
-C    Copyright (C) 2000 Mark Drela 
-C 
+C
+C    Copyright (C) 2000 Mark Drela
+C
 C    This program is free software; you can redistribute it and/or modify
 C    it under the terms of the GNU General Public License as published by
 C    the Free Software Foundation; either version 2 of the License, or
@@ -36,9 +36,9 @@ C----------------------------------------------------------------
       CHARACTER*(*) CODE, TITLE, CCLEN
       LOGICAL LGRID, LCDW, LLIST, LEGND, LAECEN, LCDH, LCMDOT
 C
-      INTEGER NA(NPOL), 
+      INTEGER NA(NPOL),
      &        ICOL(NPOL), ILIN(NPOL), NBL(NPOL),
-     &        IFCOL(NDAT), IFSYM(NDAT), 
+     &        IFCOL(NDAT), IFSYM(NDAT),
      &        NF(4,NDAT), IMATYP(NPOL),IRETYP(NPOL)
       REAL CPOL(NAX,IPTOT,NPOL), XYREF(NFX,2,4,NDAT),
      &     CPOLSD(NAX,ISX,JPTOT,NPOL)
@@ -65,15 +65,15 @@ C---- unpack plot limit array
       CLMIN = CPOLPLF(1,ICL)
       CLMAX = CPOLPLF(2,ICL)
       CLDEL = CPOLPLF(3,ICL)
-C                 
+C
       CDMIN = CPOLPLF(1,ICD)
       CDMAX = CPOLPLF(2,ICD)
       CDDEL = CPOLPLF(3,ICD)
-C                 
+C
       CMMIN = CPOLPLF(1,ICM)
       CMMAX = CPOLPLF(2,ICM)
       CMDEL = CPOLPLF(3,ICM)
-C                 
+C
       ALMIN = CPOLPLF(1,IAL)
       ALMAX = CPOLPLF(2,IAL)
       ALDEL = CPOLPLF(3,IAL)
@@ -135,17 +135,17 @@ C---- set default color index
 C---- reorigin for CDMIN,CLMIN
       CALL PLOT(-CDWT*CDMIN,-CLWT*CLMIN,-3)
 C
-C---- put Polar labels above plots 
+C---- put Polar labels above plots
 C     Labels contain: Title
 C           airfoils: Name, Mach, Re, and Ncrit
 C
       XPLT0 = CDWT*CDMIN
       YPLT0 = CLWT*CLMAX
-      CALL POLLAB(NPOL, NAME ,ICOL, ISX,NBL,
+      CALL POLLAB(NPOL, NAME ,ICOL, ISX, NBL,
      &           IMATYP, IRETYP,
      &           MACH, REYN, ACRIT, PTRAT, ETAP,
      &           TITLE,
-     &           XPLT0,YPLT0, PLOTAR, CH,CH2, 
+     &           XPLT0,YPLT0, PLOTAR, CH,CH2,
      &           LLIST, CCLEN,NCLEN )
 C
       CALL NEWCOLOR(ICOL0)
@@ -478,7 +478,7 @@ C
       NDIG = NDIGITS(CMDEL)
 C---- Offset CM axis to start at CL=0.0 or at CLmin if CLmin>0
       IF(CLMAX*CLMIN.LE.0.0) THEN
-       CMOFF = 0.0 
+       CMOFF = 0.0
       ELSE
        CMOFF = CLWT*CLMIN
       ENDIF
@@ -573,7 +573,7 @@ C
          CALL PLOT(XOC,YL,2)
        END DO
 C
-C----- fine grid 
+C----- fine grid
       IF(LGRID) THEN
        CALL NEWPEN(1)
        DXG =  XOC*0.5   / 5.0
@@ -642,14 +642,14 @@ C---- reset scale factors
 C
       RETURN
       END ! POLPLT
- 
+
 
 
       SUBROUTINE POLLAB(NPOL, NAME ,ICOL, ISX,NBL,
      &                 IMATYP, IRETYP,
      &                 MACH, REYN, ACRIT, PTRAT, ETAP,
      &                 TITLE,
-     &                 XPLT0,YPLT0, PLOTAR, CH,CH2, 
+     &                 XPLT0,YPLT0, PLOTAR, CH,CH2,
      &                 LLIST, CCLEN,NCLEN )
 C
       INCLUDE 'PINDEX.INC'
@@ -838,7 +838,7 @@ C...Returns number of significant (non-zero) fractional digits
    1  XDIF = XMAG-IFIX(XMAG)
       IF(XDIF.LT.1.E-5 .OR. 1.0-XDIF.LT.1.E-5) RETURN
         NDIGITS = NDIGITS+1
-        XMAG = 10.*XMAG 
+        XMAG = 10.*XMAG
         GO TO 1
       END
 
@@ -858,7 +858,7 @@ C----------------------------------------------------------------
       CHARACTER*(*) CODE, TITLE
       LOGICAL LGRID, LLIST, LEGND
 C
-      INTEGER NA(NPOL), 
+      INTEGER NA(NPOL),
      &        ICOL(NPOL), ILIN(NPOL),
      &        IMATYP(NPOL),IRETYP(NPOL)
       REAL VPOL(NAX,2,NPOL)
@@ -885,11 +885,11 @@ C---- unpack plot limit array
       VHMIN = VPOLPLF(1,1)
       VHMAX = VPOLPLF(2,1)
       VHDEL = VPOLPLF(3,1)
-C                 
+C
       VZMIN = VPOLPLF(1,2)
       VZMAX = VPOLPLF(2,2)
       VZDEL = VPOLPLF(3,2)
-C                 
+C
 
 c      WRITE(*,*) VPOLPLF(1,1),VPOLPLF(2,1),VPOLPLF(3,1)
 c      WRITE(*,*) VPOLPLF(1,2),VPOLPLF(2,2),VPOLPLF(3,2)
@@ -929,7 +929,7 @@ C---- set default color index
 C---- reorigin for VZMIN,VHMIN
       CALL PLOT(-VHWT*VHMIN,-VZWT*VZMIN,-3)
 C
-C---- put Polar labels above plots 
+C---- put Polar labels above plots
 C     Labels contain: Title
 C           airfoils: Name, Mach, Re, and Ncrit
 C
@@ -939,7 +939,7 @@ C
      &           IMATYP,IRETYP,
      &           MACH, REYN, ACRIT, PTRAT, ETAP,
      &           TITLE,
-     &           XPLT0,YPLT0, PLOTAR, CH,CH2, 
+     &           XPLT0,YPLT0, PLOTAR, CH,CH2,
      &           LLIST, ' ',0 )
 C
       CALL NEWCOLOR(ICOL0)
