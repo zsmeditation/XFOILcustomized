@@ -2945,11 +2945,11 @@ C
       IF(.NOT.LBLINI) THEN
 C
 C----- set initial Ue from inviscid Ue
-       DO IBL=1, NBL(1)
+       DO IBL=1, NBL(1) ! top surface IS=1
          UEDG(IBL,1) = UINV(IBL,1)
        ENDDO
 C
-       DO IBL=1, NBL(2)
+       DO IBL=1, NBL(2) ! top surface IS=2
          UEDG(IBL,2) = UINV(IBL,2)
        ENDDO
 C

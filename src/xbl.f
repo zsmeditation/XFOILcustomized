@@ -186,7 +186,7 @@ C---- set primary variables for current station
       THI = THET(IBL,IS)
       MDI = MASS(IBL,IS)
 C
-      DSI = MDI/UEI
+      DSI = MDI/UEI ! delta^* = m / ue
 C
       IF(WAKE) THEN
        IW = IBL - IBLTE(IS)
@@ -234,10 +234,10 @@ C
       IF(IBL.EQ.IBLTE(IS)+1) THEN
 C
 C----- define quantities at start of wake, adding TE base thickness to Dstar
-       TTE = THET(IBLTE(1),1) + THET(IBLTE(2),2)
-       DTE = DSTR(IBLTE(1),1) + DSTR(IBLTE(2),2) + ANTE
+       TTE = THET(IBLTE(1),1) + THET(IBLTE(2),2) ! theta
+       DTE = DSTR(IBLTE(1),1) + DSTR(IBLTE(2),2) + ANTE ! displacement; delta^*
        CTE = ( CTAU(IBLTE(1),1)*THET(IBLTE(1),1)
-     &       + CTAU(IBLTE(2),2)*THET(IBLTE(2),2) ) / TTE
+     &       + CTAU(IBLTE(2),2)*THET(IBLTE(2),2) ) / TTE ! ctau^0.5; seems that NOT ctau
        CALL TESYS(CTE,TTE,DTE)
 C
        TTE_TTE1 = 1.0
@@ -277,7 +277,7 @@ C
 C---- Save wall shear and equil. max shear coefficient for plotting output
       TAU(IBL,IS) = 0.5*R2*U2*U2*CF2
       DIS(IBL,IS) =     R2*U2*U2*U2*DI2*HS2*0.5
-      CTQ(IBL,IS) = CQ2
+      CTQ(IBL,IS) = CQ2 ! This is computed in BLSYS of xblsys.f
       DELT(IBL,IS) = DE2
       USLP(IBL,IS) = 1.60/(1.0+US2)
 C
@@ -556,7 +556,7 @@ C---- shape parameters for separation criteria
       HLMAX = 3.8
       HTMAX = 2.5
 C
-      DO 2000 IS = 1, 2
+      DO 2000 IS = 1, 2 ! loop over two airfoil sides
 C
       WRITE(*,*) '   side ', IS, ' ...'
 C
@@ -972,7 +972,7 @@ C-------- check for transition and set appropriate flags and things
 C
           IF(IBL.EQ.IBLTE(IS)+1) THEN
            TTE = THET(IBLTE(1),1) + THET(IBLTE(2),2)
-           DTE = DSTR(IBLTE(1),1) + DSTR(IBLTE(2),2) + ANTE
+           DTE = DSTR(IBLTE(1),1) + DSTR(IBLTE(2),2) + ANTE ! ANTE accounts for TE thickness by modeling it as an extra displacement
            CTE = ( CTAU(IBLTE(1),1)*THET(IBLTE(1),1)
      &           + CTAU(IBLTE(2),2)*THET(IBLTE(2),2) ) / TTE
            CALL TESYS(CTE,TTE,DTE)

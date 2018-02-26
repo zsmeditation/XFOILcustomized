@@ -1403,7 +1403,7 @@ C
 C
    11 CONTINUE
 C
-      IST = I
+      IST = I ! panel index of stagnation point
       DGAM = GAM(I+1) - GAM(I)
       DS = S(I+1) - S(I)
 C
@@ -1428,6 +1428,8 @@ C
       SUBROUTINE IBLPAN
 C-------------------------------------------------------------
 C     Sets  BL location -> panel location  pointer array IPAN
+C
+C     Most of the variables changed here are defined in XFOIL.INC
 C-------------------------------------------------------------
       INCLUDE 'XFOIL.INC'
 C
@@ -1442,7 +1444,7 @@ C
    10 CONTINUE
 C
       IBLTE(IS) = IBL
-      NBL(IS) = IBL
+      NBL(IS) = IBL ! total number of locations on the total surface
 C
 C---- bottom surface next
       IS = 2
@@ -1451,7 +1453,7 @@ C
       DO 20 I=IST+1, N
         IBL = IBL+1
         IPAN(IBL,IS) = I
-        VTI(IBL,IS) = -1.0
+         VTI(IBL,IS) = -1.0
    20 CONTINUE
 C
 C---- wake
@@ -1466,7 +1468,7 @@ C
 C
       NBL(IS) = IBLTE(IS) + NW
 C
-C---- upper wake pointers (for plotting only)
+C---- upper wake pointers (for plotting only) (corresponding to IS=1)
       DO 35 IW=1, NW
         IPAN(IBLTE(1)+IW,1) = IPAN(IBLTE(2)+IW,2)
          VTI(IBLTE(1)+IW,1) = 1.0

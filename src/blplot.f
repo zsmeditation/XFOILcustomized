@@ -847,7 +847,7 @@ C---- plot upper and lower distributions
       CALL NEWCOLOR(ICOLS(1))
       CALL XYLINE(NBLS,XXBL(IT1,1),CTAU(IT1,1),XMIN,XSF,YMIN,YSF,1)
 cc    CALL XYLINE(NBLS,XXBL(IT1,1), CTQ(IT1,1),XMIN,XSF,YMIN,YSF,4)
-      CALL XYLINE(NUMBL(1),XXBL(2,1),CTQ(2,1),XMIN,XSF,YMIN,YSF,4)
+      CALL XYLINE(NUMBL(1),XXBL(2,1),CTQ(2,1),XMIN,XSF,YMIN,YSF,4) ! CTQ is probably the equilibrium
       CALL NEWCOLOR(ICOLS(2))
       CALL XYLINE(NBLP,XXBL(IT2,2),CTAU(IT2,2),XMIN,XSF,YMIN,YSF,1)
 CCC   CALL XYLINE(NBLP,XXBL(IT2,2), CTQ(IT2,2),XMIN,XSF,YMIN,YSF,4)
@@ -955,7 +955,7 @@ c          UEI = UEDG(IBL,IS)
 c          UC = UEI * (1.0-TKLAM) / (1.0 - TKLAM*(UEI/QINF)**2)
 c          AMSQ = UC*UC*HSTINV / (GAMM1*(1.0 - 0.5*UC*UC*HSTINV))
 c          CALL HKIN( DSI/THI, AMSQ, HKI, DUMMY, DUMMY)
-c          
+c
 c          TRB = 100.0 * EXP( -(ACRIT(IS)+8.43)/2.4 )
 c          HMI = 1.0/(HKI-1.0)
 c          GFUN = 3.625*LOG(TANH(10.0*(HMI - 0.55)) + 6.0)
@@ -1085,7 +1085,7 @@ c          UEI = UEDG(IBL,IS)
 c          UC = UEI * (1.0-TKLAM) / (1.0 - TKLAM*(UEI/QINF)**2)
 c          AMSQ = UC*UC*HSTINV / (GAMM1*(1.0 - 0.5*UC*UC*HSTINV))
 c          CALL HKIN( DSI/THI, AMSQ, HKI, DUMMY, DUMMY)
-cC          
+cC
 c          TRB = 100.0 * EXP( -(ACRIT(IS)+8.43)/2.4 )
 c          HMI = 1.0/(HKI-1.0)
 c          GFUN = 3.625*LOG(TANH(10.0*(HMI - 0.55)) + 6.0)
@@ -2014,4 +2014,3 @@ C
 C
       RETURN
       END ! VLABEL
-

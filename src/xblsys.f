@@ -616,7 +616,7 @@ C
 C---- for the similarity station, "1" and "2" variables are the same
       IF(SIMI) THEN
        DO 3 ICOM=1, NCOM
-         COM1(ICOM) = COM2(ICOM)
+         COM1(ICOM) = COM2(ICOM) ! what are COM1 and COM2??
     3  CONTINUE
       ENDIF
 C
@@ -665,6 +665,8 @@ C
 C--------------------------------------------------------
 C     Sets up "dummy" BL system between airfoil TE point
 C     and first wake point infinitesimally behind TE.
+C
+C     Some annotations were give above in the SUBROUTINE BLSYS.
 C--------------------------------------------------------
       IMPLICIT REAL (M)
       INCLUDE 'XBL.INC'
@@ -819,7 +821,7 @@ C
       HS2_RE =                  HS2_RT2*RT2_RE
 C
 C---- normalized slip velocity  Us
-      US2     = 0.5*HS2*( 1.0 - (HK2-1.0)/(GBCON*H2) )
+      US2     = 0.5*HS2*( 1.0 - (HK2-1.0)/(GBCON*H2) ) ! slip velocity eqn (21) in (MSES,1987)
       US2_HS2 = 0.5  *  ( 1.0 - (HK2-1.0)/(GBCON*H2) )
       US2_HK2 = 0.5*HS2*(     -  1.0     /(GBCON*H2) )
       US2_H2  = 0.5*HS2*        (HK2-1.0)/(GBCON*H2**2)
@@ -897,16 +899,16 @@ C
 C
 C---- set skin friction coefficient
       IF(ITYP.EQ.3) THEN
-C----- wake
+C----- turbulent wake
        CF2     = 0.
        CF2_HK2 = 0.
        CF2_RT2 = 0.
        CF2_M2  = 0.
       ELSE IF(ITYP.EQ.1) THEN
-C----- laminar
+C----- laminar BL
        CALL CFL( HK2, RT2, M2, CF2, CF2_HK2, CF2_RT2, CF2_M2 )
       ELSE
-C----- turbulent
+C----- turbulent BL
        CALL CFT( HK2, RT2, M2, CF2, CF2_HK2, CF2_RT2, CF2_M2 )
        CALL CFL( HK2, RT2, M2, CF2L,CF2L_HK2,CF2L_RT2,CF2L_M2)
        IF(CF2L.GT.CF2) THEN
@@ -929,7 +931,7 @@ C
 C---- dissipation function    2 CD / H*
       IF(ITYP.EQ.1) THEN
 C
-C----- laminar
+C----- laminar BL
        CALL DIL( HK2, RT2, DI2, DI2_HK2, DI2_RT2 )
 C
        DI2_U2 = DI2_HK2*HK2_U2 + DI2_RT2*RT2_U2
@@ -952,7 +954,7 @@ C----- turbulent wall contribution
        CF2T_MS = CF2T_HK2*HK2_MS + CF2T_RT2*RT2_MS + CF2T_M2*M2_MS
        CF2T_RE =                   CF2T_RT2*RT2_RE
 C
-       DI2      =  ( 0.5*CF2T*US2 ) * 2.0/HS2
+       DI2      =  ( 0.5*CF2T*US2 ) * 2.0/HS2 ! DI2 is the wall contribution in 2*C_DISS/H*. See eqn (20) in (MSES,1987)
        DI2_HS2  = -( 0.5*CF2T*US2 ) * 2.0/HS2**2
        DI2_US2  =  ( 0.5*CF2T     ) * 2.0/HS2
        DI2_CF2T =  ( 0.5     *US2 ) * 2.0/HS2
