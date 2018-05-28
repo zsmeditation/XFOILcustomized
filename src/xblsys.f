@@ -66,7 +66,7 @@ c      DAX_T1 = -DAX/T1
 c      DAX_T2 = 0.
 C
 C==========================
-C---- 2nd-order
+C---- 2nd-order. Choose between two versions of amplification growth models
       IF(IDAMPV.EQ.0) THEN
        CALL DAMPL( HK1, T1, RT1, AX1, AX1_HK1, AX1_T1, AX1_RT1 )
        CALL DAMPL( HK2, T2, RT2, AX2, AX2_HK2, AX2_T2, AX2_RT2 )
@@ -772,14 +772,14 @@ C
       HK2_MS =                HK2_M2*M2_MS
 C
 C---- set momentum thickness Reynolds number
-      RT2    = R2*U2*T2/V2
+      RT2    = R2*U2*T2/V2 ! Re_theta
       RT2_U2 = RT2*(1.0/U2 + R2_U2/R2 - V2_U2/V2)
       RT2_T2 = RT2/T2
       RT2_MS = RT2*(         R2_MS/R2 - V2_MS/V2)
       RT2_RE = RT2*(                  - V2_RE/V2)
 C
       RETURN
-      END ! BLKIN
+      END ! SUBROUTINE BLKIN
 
 
 
@@ -834,7 +834,7 @@ C
 C
       IF(ITYP.LE.2 .AND. US2.GT.0.95) THEN
 CCC       WRITE(*,*) 'BLVAR: Us clamped:', US2
-       US2 = 0.98
+       US2 = 0.98 ! This seems to be a bug? Wouldn't it be better if US2 = 0.95 so that it is continuous?
        US2_U2 = 0.
        US2_T2 = 0.
        US2_D2 = 0.
@@ -1006,7 +1006,7 @@ C
       ENDIF
 C
 C
-C---- Add on turbulent outer layer contribution
+C---- Add on turbulent outer layer contribution if the profile it's not laminar BL
       IF(ITYP.NE.1) THEN
 C
        DD     =  S2**2 * (0.995-US2) * 2.0/HS2
@@ -1039,6 +1039,7 @@ C
       ENDIF
 C
 C
+C---- Laminar-turbulent BL blending
       IF(ITYP.EQ.2) THEN
         CALL DIL( HK2, RT2, DI2L, DI2L_HK2, DI2L_RT2 )
 C
@@ -1069,6 +1070,7 @@ c        DI2_MS = DI2_MS + DDI_US2*US2_MS * DW2/DWTE
 c        DI2_RE = DI2_RE + DDI_US2*US2_RE * DW2/DWTE
 c       ENDIF
 C
+C---- Laminar-turbulent wake blending
       IF(ITYP.EQ.3) THEN
 C------ laminar wake CD
         CALL DILW( HK2, RT2, DI2L, DI2L_HK2, DI2L_RT2 )
@@ -1087,9 +1089,8 @@ ccc         write(*,*) 'CDt CDl Rt Hk:', DI2, DI2L, RT2, HK2
         ENDIF
       ENDIF
 C
-C
-      IF(ITYP.EQ.3) THEN
 C----- double dissipation for the wake (two wake halves)
+      IF(ITYP.EQ.3) THEN
        DI2    = DI2   *2.0
        DI2_S2 = DI2_S2*2.0
        DI2_U2 = DI2_U2*2.0
@@ -1098,8 +1099,10 @@ C----- double dissipation for the wake (two wake halves)
        DI2_MS = DI2_MS*2.0
        DI2_RE = DI2_RE*2.0
       ENDIF
+C---- Finished computing dissipation function    2 CD / H*
+
 C
-C---- BL thickness (Delta) from simplified Green's correlation
+C---- BL thickness (Delta) from simplified Green's correlation, i.e. (MSES,1987) eqn (23)
       DE2     = (3.15 + 1.72/(HK2-1.0)   )*T2  +  D2
       DE2_HK2 = (     - 1.72/(HK2-1.0)**2)*T2
 C
@@ -1108,6 +1111,7 @@ C
       DE2_D2 = DE2_HK2*HK2_D2 + 1.0
       DE2_MS = DE2_HK2*HK2_MS
 C
+C---- Limit the nominal BL thickness
 ccc      HDMAX = 15.0
       HDMAX = 12.0
       IF(DE2 .GT. HDMAX*T2) THEN
@@ -1120,7 +1124,7 @@ cccc      IF(DE2 .GT. HDMAX*T2 .AND. (HK2 .GT. 4.0 .OR. ITYP.EQ.3)) THEN
       ENDIF
 C
       RETURN
-      END
+      END ! SUBROUTINE BLVAR(ITYP)
 
 
       SUBROUTINE BLMID(ITYP)
@@ -1191,7 +1195,7 @@ C
      &                                            + CFM_RTA*RT2_RE)
 C
       RETURN
-      END ! BLMID
+      END ! SUBROUTINE BLMID(ITYP)
 
 
       SUBROUTINE TRDIF
@@ -1548,7 +1552,7 @@ C-    were already restored for the XT-X2 differencing part.
    70 CONTINUE
 C
       RETURN
-      END
+      END ! SUBROUTINE TRDIF
 
 
       SUBROUTINE BLDIF(ITYP)
@@ -1567,7 +1571,7 @@ C-----------------------------------------------------------
       INCLUDE 'XBL.INC'
 C
       IF(ITYP.EQ.0) THEN
-C----- similarity logarithmic differences  (prescribed)
+C----- similarity logarithmic differences (prescribed)
        XLOG = 1.0
        ULOG = BULE
        TLOG = 0.5*(1.0 - BULE)
@@ -1586,6 +1590,7 @@ C       HLOG = 2.0*(HS2-HS1)/(HS2+HS1)
        DDLOG = 1.0
       ENDIF
 C
+C---- Reset residuals/jacobians to zero
       DO 55 K=1, 4
         VSREZ(K) = 0.
         VSM(K) = 0.
@@ -1663,7 +1668,7 @@ C----- set average amplification AX over interval X1..X2
      &      AX, AX_HK1, AX_T1, AX_RT1, AX_A1,
      &          AX_HK2, AX_T2, AX_RT2, AX_A2 )
 C
-       REZC = AMPL2 - AMPL1 - AX*(X2-X1)
+       REZC = AMPL2 - AMPL1 - AX*(X2-X1) ! residual
        Z_AX = -(X2-X1)
 C
        VS1(1,1) = Z_AX* AX_A1  -  1.0
@@ -1692,14 +1697,14 @@ C
        CFA = (1.0-UPW)*CF1 + UPW*CF2
        HKA = (1.0-UPW)*HK1 + UPW*HK2
 C
-       USA = 0.5*(US1 + US2)
-       RTA = 0.5*(RT1 + RT2)
-       DEA = 0.5*(DE1 + DE2)
-       DA  = 0.5*(D1  + D2 )
+       USA = 0.5*(US1 + US2) ! Us slip velocity
+       RTA = 0.5*(RT1 + RT2) ! Re_theta
+       DEA = 0.5*(DE1 + DE2) ! delta nominal (BL thickness)
+       DA  = 0.5*(D1  + D2 ) ! delta^*
 C
 C
        IF(ITYP.EQ.3) THEN
-C------ increased dissipation length in wake (decrease its reciprocal)
+C------ increased dissipation length in wake (decrease its reciprocal and thus ALD)
         ALD = DLCON
        ELSE
         ALD = 1.0
@@ -1727,7 +1732,7 @@ C
        HR_HKA = HKC_HKA / (GACON*ALD*HKA) - HR / HKA
        HR_RTA = HKC_RTA / (GACON*ALD*HKA)
 C
-       UQ     = (0.5*CFA - HR**2) / (GBCON*DA)
+       UQ     = (0.5*CFA - HR**2) / (GBCON*DA) ! (1/Ue dUe/dx)_equilibrium
        UQ_HKA =   -2.0*HR*HR_HKA  / (GBCON*DA)
        UQ_RTA =   -2.0*HR*HR_RTA  / (GBCON*DA)
        UQ_CFA =   0.5             / (GBCON*DA)
@@ -1766,9 +1771,10 @@ C
        SLOG = LOG(S2/S1)
        DXI = X2 - X1
 C
-       REZC = SCC*(CQA - SA*ALD)*DXI
-     &      - DEA*2.0*          SLOG
-     &      + DEA*2.0*(UQ*DXI - ULOG)*DUXCON
+C----- The following residual is eqn (23) of (XFOIL,1989): residual = (RHS-LHS) * d(xi)
+       REZC = SCC*(CQA - SA*ALD)*DXI ! discretizes 5.6*(ctau_eq^0.5 - ctau^0.5*ALD) * d(xi)
+     &      - DEA*2.0*          SLOG ! discretizes delta * 2 * d(ln(ctau^0.5))
+     &      + DEA*2.0*(UQ*DXI - ULOG)*DUXCON ! discretizes delta * 2 * (UQ * d(xi) - d(ln(u_e)) * DUXCON
 C
 
 c        if(  ! (rt2.gt.1.0e3 .and. rt1.le.1.0e3) .or.
@@ -1976,7 +1982,7 @@ C
       VSREZ(3) = -REZH
 C
       RETURN
-      END
+      END ! SUBROUTINE BLDIF(ITYP)
 
 
 
@@ -2094,7 +2100,7 @@ C
       ENDIF
 C
       RETURN
-      END ! DAMPL
+      END ! SUBROUTINE DAMPL( HK, TH, RT, AX, AX_HK, AX_TH, AX_RT )
 
 
 
@@ -2271,7 +2277,7 @@ C---- blend the two amplification rates
       AX_TH = HFAC*AX2_TH + (1.0 - HFAC)*AX1_TH
 C
       RETURN
-      END ! DAMPL2
+      END ! SUBROUTINE DAMPL2( HK, TH, RT, AX, AX_HK, AX_TH, AX_RT )
 
 
 
@@ -2375,6 +2381,7 @@ C
 
 
       SUBROUTINE DIT( HS, US, CF, ST, DI, DI_HS, DI_US, DI_CF, DI_ST )
+C     This function was called under BLVAR around line 946 but has been commented out
 C
 C---- Turbulent dissipation function  ( 2 CD/H* )
       DI    =  ( 0.5*CF*US + ST*ST*(1.0-US) ) * 2.0/HS

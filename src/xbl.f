@@ -1190,7 +1190,7 @@ C
  2000 CONTINUE
 C
       RETURN
-      END
+      END ! SUBROUTINE MRCHDU
 
 
       SUBROUTINE XIFSET(IS)
@@ -1200,8 +1200,8 @@ C-----------------------------------------------------
       INCLUDE 'XFOIL.INC'
       INCLUDE 'XBL.INC'
 C
-      IF(XSTRIP(IS).GE.1.0) THEN
-       XIFORC = XSSI(IBLTE(IS),IS)
+      IF(XSTRIP(IS).GE.1.0) THEN ! If the user-specified forced transition (i.e. trip) location is off the airfoil, ...
+       XIFORC = XSSI(IBLTE(IS),IS) ! then, force the transition to happen at the airfoil TE by default
        RETURN
       ENDIF
 C
@@ -1245,7 +1245,7 @@ C
       ENDIF
 C
       RETURN
-      END
+      END ! SUBROUTINE XIFSET(IS)
 
 
 
@@ -1557,7 +1557,7 @@ C---- equate upper wake arrays to lower wake arrays
     6 CONTINUE
 C
       RETURN
-      END
+      END !SUBROUTINE UPDATE
 
 
 
@@ -1571,11 +1571,14 @@ C
       DSTR = DSTR + DH*THET
 C
       RETURN
-      END
+      END ! SUBROUTINE DSLIM
 
 
 
       SUBROUTINE BLPINI
+C------------------------------------------------------------------
+C      Initializes BL parameters/constants.  See some definitions in XBL.INC
+C------------------------------------------------------------------
       INCLUDE 'BLPAR.INC'
 C
       SCCON = 5.6
@@ -1594,4 +1597,4 @@ C
       CFFAC = 1.0
 C
       RETURN
-      END
+      END ! SUBROUTINE BLPINI
