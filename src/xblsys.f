@@ -274,19 +274,19 @@ C---- set initial guess for iterate N2 (AMPL2) at X2
       AMPL2 = AMPL1 + AX*(X2-X1)
 C
 C---- solve implicit system for amplification AMPL2
-      DO 100 ITAM=1, 30
+      DO 100 ITAM=1, 30 ! Newton iteration
 C
 C---- define weighting factors WF1,WF2 for defining "T" quantities from 1,2
 C
       IF(AMPL2 .LE. AMCRIT) THEN
-C------ there is no transition yet,  "T" is the same as "2"
+C------ there is no natural transition yet,  "T" is the same as "2"
         AMPLT    = AMPL2
         AMPLT_A2 = 1.0
         SFA    = 1.0
         SFA_A1 = 0.
         SFA_A2 = 0.
       ELSE
-C------ there is transition in X1..X2, "T" is set from N1, N2
+C------ there is natural transition in X1..X2, "T" is set from N1, N2
         AMPLT    = AMCRIT
         AMPLT_A2 = 0.
         SFA    = (AMPLT - AMPL1)/(AMPL2-AMPL1)
@@ -294,6 +294,7 @@ C------ there is transition in X1..X2, "T" is set from N1, N2
         SFA_A2 = (      - SFA  )/(AMPL2-AMPL1)
       ENDIF
 C
+C------ check forced transition
       IF(XIFORC.LT.X2) THEN
         SFX    = (XIFORC - X1 )/(X2-X1)
         SFX_X1 = (SFX    - 1.0)/(X2-X1)
@@ -306,8 +307,8 @@ C
         SFX_XF = 0.
       ENDIF
 C
-C---- set weighting factor from free or forced transition
-      IF(SFA.LT.SFX) THEN
+C---- set weighting factor from free (natural) or forced transition depending
+      IF(SFA.LT.SFX) THEN ! if natural transition happens before forced transition
         WF2    = SFA
         WF2_A1 = SFA_A1
         WF2_A2 = SFA_A2
@@ -342,10 +343,10 @@ C
       WF1_XF =     - WF2_XF
 C
 C---- interpolate BL variables to XT
-      XT    = X1*WF1    + X2*WF2
-      TT    = T1*WF1    + T2*WF2
-      DT    = D1*WF1    + D2*WF2
-      UT    = U1*WF1    + U2*WF2
+      XT    = X1*WF1    + X2*WF2 ! transition front location X coordinate
+      TT    = T1*WF1    + T2*WF2 ! theta
+      DT    = D1*WF1    + D2*WF2 ! delta^*
+      UT    = U1*WF1    + U2*WF2 ! ?
 C
       XT_A2 = X1*WF1_A2 + X2*WF2_A2
       TT_A2 = T1*WF1_A2 + T2*WF2_A2
@@ -386,7 +387,7 @@ C---- calculate amplification rate AX over current X1-XT interval
      &     AX, AX_HK1, AX_T1, AX_RT1, AX_A1,
      &         AX_HKT, AX_TT, AX_RTT, AX_AT )
 C
-C---- punch out early if there is no amplification here
+C---- punch out early if there is no amplification (growth) here
       IF(AX .LE. 0.0) GO TO 101
 C
 C---- set sensitivity of AX(A2)
@@ -399,16 +400,17 @@ C---- residual for implicit AMPL2 definition (amplification equation)
       RES    = AMPL2 - AMPL1 - AX   *(X2-X1)
       RES_A2 = 1.0           - AX_A2*(X2-X1)
 C
-      DA2 = -RES/RES_A2
-C
-      RLX = 1.0
-      DXT = XT_A2*DA2
-C
-      IF(RLX*ABS(DXT/(X2-X1)) .GT. 0.05) RLX = 0.05*ABS((X2-X1)/DXT)
-      IF(RLX*ABS(DA2)         .GT. 1.0 ) RLX = 1.0 *ABS(   1.0 /DA2)
+      DA2 = -RES/RES_A2 ! Newton step in AMPL2
 C
 C---- check if converged
       IF(ABS(DA2) .LT. DAEPS) GO TO 101
+C
+      RLX = 1.0 ! Newton step size scale factor.  RLX = 1.0 means Newton method without line search
+      DXT = XT_A2*DA2
+C
+C---- scale down (i.e. limit) Newton step size.  Not sure what the reasoning is ???
+      IF(RLX*ABS(DXT/(X2-X1)) .GT. 0.05) RLX = 0.05*ABS((X2-X1)/DXT)
+      IF(RLX*ABS(DA2)         .GT. 1.0 ) RLX = 1.0 *ABS(   1.0 /DA2)
 C
       IF((AMPL2.GT.AMCRIT .AND. AMPL2+RLX*DA2.LT.AMCRIT).OR.
      &   (AMPL2.LT.AMCRIT .AND. AMPL2+RLX*DA2.GT.AMCRIT)    ) THEN
@@ -616,7 +618,7 @@ C
 C---- for the similarity station, "1" and "2" variables are the same
       IF(SIMI) THEN
        DO 3 ICOM=1, NCOM
-         COM1(ICOM) = COM2(ICOM) ! what are COM1 and COM2??
+         COM1(ICOM) = COM2(ICOM) ! COM1 seems to be the set of variables/parameters at station 1
     3  CONTINUE
       ENDIF
 C
@@ -1327,12 +1329,12 @@ C-    equation is unnecessary here, so the K=1 row is left empty.
      &           + VS2(K,2)*TT_MS
      &           + VS2(K,3)*DT_MS
      &           + VS2(K,4)*UT_MS
-     &           + VS2(K,5)*XT_MS
+     &           + VS2(K,5)*XT_MS ! d(Residual)/d(MS).  Not sure what MS is???
         BLR(K)   = VSR(K)
      &           + VS2(K,2)*TT_RE
      &           + VS2(K,3)*DT_RE
      &           + VS2(K,4)*UT_RE
-     &           + VS2(K,5)*XT_RE
+     &           + VS2(K,5)*XT_RE ! d(Residual)/d(RE).  Not sure what RE is???
         BLX(K)   = VSX(K)
      &           + VS2(K,2)*TT_XF
      &           + VS2(K,3)*DT_XF
