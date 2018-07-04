@@ -84,7 +84,7 @@ C----- initialize BL by marching with Ue (fudge at separation)
        WRITE(*,*)
        WRITE(*,*) 'Initializing BL ...'
        CALL MRCHUE
-       LBLINI = .TRUE.
+       LBLINI = .TRUE. ! initialization happens only once
       ENDIF
 C
       WRITE(*,*)
@@ -158,7 +158,7 @@ C---- similarity station pressure gradient parameter  x/u du/dx
       IBL = 2
       BULE = 1.0
 C
-      AMCRIT = ACRIT(IS)
+      AMCRIT = ACRIT(IS) ! critical amplification ratio of the current boundary layer/wake
 C
 C---- set forced transition arc length position
       CALL XIFSET(IS)
@@ -171,17 +171,19 @@ C**** Sweep downstream setting up BL equation linearizations
 C
       IV  = ISYS(IBL,IS)
 C
-      SIMI = IBL.EQ.2
-      WAKE = IBL.GT.IBLTE(IS)
-      TRAN = IBL.EQ.ITRAN(IS)
-      TURB = IBL.GT.ITRAN(IS)
+C---- set locigal flags to identify proper BL/wake identity
+      SIMI = IBL.EQ.2 ! similarity station
+      WAKE = IBL.GT.IBLTE(IS) ! wake
+      TRAN = IBL.EQ.ITRAN(IS) ! transition
+      TURB = IBL.GT.ITRAN(IS) ! turbulent
 C
       I = IPAN(IBL,IS)
 C
 C---- set primary variables for current station
       XSI = XSSI(IBL,IS)
-      IF(IBL.LT.ITRAN(IS)) AMI = CTAU(IBL,IS)
-      IF(IBL.GE.ITRAN(IS)) CTI = CTAU(IBL,IS)
+C----- interpret the primary variable CTAU differently depending whether transition has occurred
+      IF(IBL.LT.ITRAN(IS)) AMI = CTAU(IBL,IS) ! amplification factor \tilde{n}
+      IF(IBL.GE.ITRAN(IS)) CTI = CTAU(IBL,IS) ! sqrt(c_\tau)
       UEI = UEDG(IBL,IS)
       THI = THET(IBL,IS)
       MDI = MASS(IBL,IS)
@@ -224,6 +226,7 @@ C---- check for transition and set TRAN, XT, etc. if found
         CALL TRCHEK
         AMI = AMPL2
       ENDIF
+C---- when the current interval contains transition in the previous solution iteration, but no longer contains transition in the current iteration
       IF(IBL.EQ.ITRAN(IS) .AND. .NOT.TRAN) THEN
        WRITE(*,*) 'SETBL: Xtr???  n1 n2: ', AMPL1, AMPL2
       ENDIF
@@ -275,7 +278,7 @@ C
 C
 C
 C---- Save wall shear and equil. max shear coefficient for plotting output
-      TAU(IBL,IS) = 0.5*R2*U2*U2*CF2
+      TAU(IBL,IS) = 0.5*R2*U2*U2*CF2 !tau_w
       DIS(IBL,IS) =     R2*U2*U2*U2*DI2*HS2*0.5
       CTQ(IBL,IS) = CQ2 ! This is computed in BLSYS of xblsys.f
       DELT(IBL,IS) = DE2
@@ -932,7 +935,7 @@ C------ initialize current station to existing variables
 CCC        MDI = MASS(IBL,IS)
 C
 C------ fixed BUG   MD 7 June 99
-        IF(IBL.LT.ITROLD) THEN
+        IF(IBL.LT.ITROLD) THEN ! if the current station is upstream w.r.t. the OLD transition station... aka if it was laminar
          AMI = CTAU(IBL,IS)
          CTI = 0.03
         ELSE
@@ -949,8 +952,8 @@ C
          DSWAKI = 0.
         ENDIF
 C
-        IF(IBL.LE.IBLTE(IS)) DSI = MAX(DSI-DSWAKI,1.02000*THI) + DSWAKI
-        IF(IBL.GT.IBLTE(IS)) DSI = MAX(DSI-DSWAKI,1.00005*THI) + DSWAKI
+        IF(IBL.LE.IBLTE(IS)) DSI = MAX(DSI-DSWAKI,1.02000*THI) + DSWAKI ! BL
+        IF(IBL.GT.IBLTE(IS)) DSI = MAX(DSI-DSWAKI,1.00005*THI) + DSWAKI ! wake
 C
 C------ Newton iteration loop for current station
         DO 100 ITBL=1, 25
@@ -967,7 +970,7 @@ C-------- check for transition and set appropriate flags and things
            CALL TRCHEK
            AMI = AMPL2
            IF(     TRAN) ITRAN(IS) = IBL
-           IF(.NOT.TRAN) ITRAN(IS) = IBL+2
+           IF(.NOT.TRAN) ITRAN(IS) = IBL+2 ! why this?
           ENDIF
 C
           IF(IBL.EQ.IBLTE(IS)+1) THEN
@@ -998,7 +1001,7 @@ C---------- extrapolate baseline Hk
            ENDIF
 C
 C--------- if current point IBL was laminar, then...
-           IF(IBL.LT.ITROLD) THEN
+           IF(IBL.LT.ITROLD) THEN ! redundant now that Line 938 already did sth?
 C---------- reinitialize or extrapolate Ctau if it's now turbulent
             IF(TRAN) CTAU(IBL,IS) = 0.03
             IF(TURB) CTAU(IBL,IS) = CTAU(IBL-1,IS)
@@ -1085,6 +1088,7 @@ C-------- eliminate absurd transients
            CTI = MAX(CTI , 0.0000001 )
           ENDIF
 C
+C-------- limit HK since the closure breaks down for HK close to or smaller than 1.0.
           IF(IBL.LE.IBLTE(IS)) THEN
             HKLIM = 1.02
           ELSE
@@ -1110,7 +1114,7 @@ C
 C------- the current solution is garbage --> extrapolate values instead
          IF(IBL.GT.3) THEN
           IF(IBL.LE.IBLTE(IS)) THEN
-           THI = THET(IBM,IS) * (XSSI(IBL,IS)/XSSI(IBM,IS))**0.5
+           THI = THET(IBM,IS) * (XSSI(IBL,IS)/XSSI(IBM,IS))**0.5 ! Blasius solution: delta ~ sqrt(s)
            DSI = DSTR(IBM,IS) * (XSSI(IBL,IS)/XSSI(IBM,IS))**0.5
            UEI = UEDG(IBM,IS)
           ELSE IF(IBL.EQ.IBLTE(IS)+1) THEN
@@ -1207,7 +1211,7 @@ C
 C
       CHX = XTE - XLE
       CHY = YTE - YLE
-      CHSQ = CHX**2 + CHY**2
+      CHSQ = CHX**2 + CHY**2 ! chord^2
 C
 C---- calculate chord-based x/c, y/c
       DO 10 I=1, N
@@ -1268,7 +1272,7 @@ C------------------------------------------------------------------
      &            (VB(1,1,IVX), Q_AC(1)  )
       REAL MSQ
 C
-C---- max allowable alpha changes per iteration
+C---- max allowable alpha changes (in radian) per iteration
       DALMAX =  0.5*DTOR
       DALMIN = -0.5*DTOR
 C
@@ -1514,8 +1518,9 @@ C
 C
 C-------- eliminate absurd transients
           IF(IBL.GE.ITRAN(IS))
-     &      CTAU(IBL,IS) = MIN( CTAU(IBL,IS) , 0.25 )
+     &      CTAU(IBL,IS) = MIN( CTAU(IBL,IS) , 0.25 ) ! set the maximum acceptable turbulent ctau to be 0.25^2
 C
+C-------- limit HK since the closure breaks down for HK close to or smaller than 1.0.
           IF(IBL.LE.IBLTE(IS)) THEN
             HKLIM = 1.02
           ELSE
@@ -1562,6 +1567,9 @@ C
 
 
       SUBROUTINE DSLIM(DSTR,THET,UEDG,MSQ,HKLIM)
+C------------------------------------------------------------------
+C      Computes delta^* that statisfies the limit on HK (given by HKLIM)
+C------------------------------------------------------------------
       IMPLICIT REAL (A-H,M,O-Z)
 C
       H = DSTR/THET

@@ -668,7 +668,7 @@ C--------------------------------------------------------
 C     Sets up "dummy" BL system between airfoil TE point
 C     and first wake point infinitesimally behind TE.
 C
-C     Some annotations were give above in the SUBROUTINE BLSYS.
+C     Some annotations were given above in the SUBROUTINE BLSYS.
 C--------------------------------------------------------
       IMPLICIT REAL (M)
       INCLUDE 'XBL.INC'
