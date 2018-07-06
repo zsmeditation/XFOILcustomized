@@ -587,9 +587,9 @@ C------------------------------------------------------------------
 C
 C     Sets up the BL Newton system governing the current interval:
 C
-C     |       ||dA1|     |       ||dA2|       |     |
-C     |  VS1  ||dT1|  +  |  VS2  ||dT2|   =   |VSREZ|
-C     |       ||dD1|     |       ||dD2|       |     |
+C     |       ||dA1|     |       ||dA2|       |     |   amp or lag equation
+C     |  VS1  ||dT1|  +  |  VS2  ||dT2|   =   |VSREZ|   von Karman momentum equation
+C     |       ||dD1|     |       ||dD2|       |     |   kinetic energy shape parameter equation
 C              |dU1|              |dU2|
 C              |dX1|              |dX2|
 C
