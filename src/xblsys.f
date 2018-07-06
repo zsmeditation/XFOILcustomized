@@ -716,7 +716,7 @@ C
       D2  = DSI - DSWAKI
       DW2 = DSWAKI
 C
-      U2 = UEI*(1.0-TKBL) / (1.0 - TKBL*(UEI/QINFBL)**2)
+      U2 = UEI*(1.0-TKBL) / (1.0 - TKBL*(UEI/QINFBL)**2) ! Karman-Tsien correction as in Eq. (35) of (XFOIL, 1989)
       U2_UEI = (1.0 + TKBL*(2.0*U2*UEI/QINFBL**2 - 1.0))
      &       / (1.0 - TKBL*(UEI/QINFBL)**2)
       U2_MS  = (U2*(UEI/QINFBL)**2  -  UEI)*TKBL_MS

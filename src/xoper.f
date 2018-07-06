@@ -180,7 +180,9 @@ C--------------------------------------------------------
      & /'   CPWR f   Output x vs Cp to file'
      & /'   CPMN     Report minimum surface Cp'
      & /'   NAME s   Specify new airfoil name'
-     & /'   NINC     Increment name version number')
+     & /'   NINC     Increment name version number'
+     & /'   NDEC     Decrement name version number'
+     & /'   DAMP     Toggle amplificaion version (Modified/Original)')
 c     &//'   IMAG    Toggle image-airfoil'
 C
 C--------------------------------------------------------
@@ -1803,6 +1805,7 @@ C
 
 
       SUBROUTINE MRSHOW(LM,LR)
+C---- Show M and R variables depending on their types
       INCLUDE 'XFOIL.INC'
       LOGICAL LM, LR
 C

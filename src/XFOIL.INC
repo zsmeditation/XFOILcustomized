@@ -567,7 +567,7 @@ C   ISYS(..)    BL Newton system line number corresponding to BL location
 C   NSYS        total number of lines in BL Newton system
 C   ITRAN(.)    BL array index of transition interval
 C   TFORCE(.)   .TRUE. if transition is forced due to transition strip
-C   TINDEX(.)
+C   TINDEX(.)   ??? not sure what this is
 C
 C   IDAMP    = 0   use original enelope e^n f(H,Rtheta) for all profiles
 C            = 1   use modified enelope e^n f(H,Rtheta) for separating profile

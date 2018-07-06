@@ -44,7 +44,7 @@ C---- set the CL used to define Mach, Reynolds numbers
 C
 C---- set current MINF(CL)
       CALL MRCL(CLMR,MA_CLMR,RE_CLMR)
-      MSQ_CLMR = 2.0*MINF*MA_CLMR
+      MSQ_CLMR = 2.0*MINF*MA_CLMR !MINF (of type 1) is actual input freestream Mach number
 C
 C---- set compressibility parameter TKLAM and derivative TK_MSQ
       CALL COMSET
@@ -62,26 +62,26 @@ C---- stagnation density and 1/enthalpy
       RSTBL    = (1.0 + 0.5*GM1BL*MINF**2) ** (1.0/GM1BL)
       RSTBL_MS = 0.5*RSTBL/(1.0 + 0.5*GM1BL*MINF**2)
 C
-      HSTINV    = GM1BL*(MINF/QINFBL)**2 / (1.0 + 0.5*GM1BL*MINF**2)
+      HSTINV    = GM1BL*(MINF/QINFBL)**2 / (1.0 + 0.5*GM1BL*MINF**2) ! 1/total enthalpy; appeared in blplot.f
       HSTINV_MS = GM1BL*( 1.0/QINFBL)**2 / (1.0 + 0.5*GM1BL*MINF**2)
      &                - 0.5*GM1BL*HSTINV / (1.0 + 0.5*GM1BL*MINF**2)
 C
 C---- set Reynolds number based on freestream density, velocity, viscosity
-      HERAT    = 1.0 - 0.5*QINFBL**2*HSTINV
+      HERAT    = 1.0 - 0.5*QINFBL**2*HSTINV ! H_inf/H_0
       HERAT_MS =     - 0.5*QINFBL**2*HSTINV_MS
 C
-      REYBL    = REINF * SQRT(HERAT**3) * (1.0+HVRAT)/(HERAT+HVRAT)
+      REYBL    = REINF * SQRT(HERAT**3) * (1.0+HVRAT)/(HERAT+HVRAT) ! HVRAT is the Sutherland constant; appeared in blplot.f; REINF (of type 1) is actual input freestream Reynolds number.  Well, isn't this Reynolds number REYBL = REINF * mu_inf/mu_0???
       REYBL_RE =         SQRT(HERAT**3) * (1.0+HVRAT)/(HERAT+HVRAT)
       REYBL_MS = REYBL * (1.5/HERAT - 1.0/(HERAT+HVRAT))*HERAT_MS
 C
-      IDAMPV = IDAMP
+      IDAMPV = IDAMP ! amplification closure version
 C
 C---- save TE thickness
       DWTE = WGAP(1)
 C
       IF(.NOT.LBLINI) THEN
 C----- initialize BL by marching with Ue (fudge at separation)
-       WRITE(*,*)
+       WRITE(*,*) ! write a blank line
        WRITE(*,*) 'Initializing BL ...'
        CALL MRCHUE
        LBLINI = .TRUE. ! initialization happens only once
@@ -92,14 +92,16 @@ C
 C---- march BL with current Ue and Ds to establish transition
       CALL MRCHDU
 C
+C---- save the current UEDG into USAV
       DO 5 IS=1, 2
         DO 6 IBL=2, NBL(IS)
-          USAV(IBL,IS) = UEDG(IBL,IS)
+          USAV(IBL,IS) = UEDG(IBL,IS) ! Recall that QINF is unity.  Thus, UEDG gives the actual velocity (not just Ue/QINF)
     6   CONTINUE
     5 CONTINUE
 C
-      CALL UESET
+      CALL UESET ! set UEDG to visous edge velocity
 C
+C---- recover the original UEDG, and store Ue in USAV
       DO 7 IS=1, 2
         DO 8 IBL=2, NBL(IS)
           TEMP = USAV(IBL,IS)
@@ -108,15 +110,17 @@ C
     8   CONTINUE
     7 CONTINUE
 C
-      ILE1 = IPAN(2,1)
+C---- panel location indices
+      ILE1 = IPAN(2,1) ! upper leading edge
       ILE2 = IPAN(2,2)
       ITE1 = IPAN(IBLTE(1),1)
-      ITE2 = IPAN(IBLTE(2),2)
+      ITE2 = IPAN(IBLTE(2),2) ! lower trailing edge
 C
+C---- BL Newton system indices
       JVTE1 = ISYS(IBLTE(1),1)
       JVTE2 = ISYS(IBLTE(2),2)
 C
-      DULE1 = UEDG(2,1) - USAV(2,1)
+      DULE1 = UEDG(2,1) - USAV(2,1) ! what for???
       DULE2 = UEDG(2,2) - USAV(2,2)
 C
 C---- set LE and TE Ue sensitivities wrt all m values
@@ -131,13 +135,14 @@ C---- set LE and TE Ue sensitivities wrt all m values
   110   CONTINUE
    10 CONTINUE
 C
+C---- set LE and TE Ue sensitivities wrt alpha
       ULE1_A = UINV_A(2,1)
       ULE2_A = UINV_A(2,2)
 C
-      TINDEX(1) = 0.0
+      TINDEX(1) = 0.0 ! what is this???
       TINDEX(2) = 0.0
 C
-C**** Go over each boundary layer/wake
+C**** Go over each boundary layer/wake (top or bottom surface)
       DO 2000 IS=1, 2
 C
 C---- there is no station "1" at similarity, so zero everything out
@@ -160,7 +165,7 @@ C---- similarity station pressure gradient parameter  x/u du/dx
 C
       AMCRIT = ACRIT(IS) ! critical amplification ratio of the current boundary layer/wake
 C
-C---- set forced transition arc length position
+C---- set forced transition arc length position (aka surface coordinate) XIFORC
       CALL XIFSET(IS)
 C
       TRAN = .FALSE.
@@ -174,19 +179,19 @@ C
 C---- set locigal flags to identify proper BL/wake identity
       SIMI = IBL.EQ.2 ! similarity station
       WAKE = IBL.GT.IBLTE(IS) ! wake
-      TRAN = IBL.EQ.ITRAN(IS) ! transition
+      TRAN = IBL.EQ.ITRAN(IS) ! transition;  transition location should have been set in MRCHUE() or MRCHDU()
       TURB = IBL.GT.ITRAN(IS) ! turbulent
 C
       I = IPAN(IBL,IS)
 C
 C---- set primary variables for current station
-      XSI = XSSI(IBL,IS)
+      XSI = XSSI(IBL,IS) ! arc length position
 C----- interpret the primary variable CTAU differently depending whether transition has occurred
       IF(IBL.LT.ITRAN(IS)) AMI = CTAU(IBL,IS) ! amplification factor \tilde{n}
       IF(IBL.GE.ITRAN(IS)) CTI = CTAU(IBL,IS) ! sqrt(c_\tau)
       UEI = UEDG(IBL,IS)
       THI = THET(IBL,IS)
-      MDI = MASS(IBL,IS)
+      MDI = MASS(IBL,IS) ! mass defect
 C
       DSI = MDI/UEI ! delta^* = m / ue
 C
@@ -218,7 +223,7 @@ C---- "forced" changes due to mismatch between UEDG and USAV=UINV+dij*MASS
       DUE2 = UEDG(IBL,IS) - USAV(IBL,IS)
       DDS2 = D2_U2*DUE2
 C
-      CALL BLPRV(XSI,AMI,CTI,THI,DSI,DSWAKI,UEI)
+      CALL BLPRV(XSI,AMI,CTI,THI,DSI,DSWAKI,UEI) ! set primary "2" variables
       CALL BLKIN
 C
 C---- check for transition and set TRAN, XT, etc. if found
@@ -234,7 +239,7 @@ C
 C---- assemble 10x4 linearized system for dCtau, dTh, dDs, dUe, dXi
 C     at the previous "1" station and the current "2" station
 C
-      IF(IBL.EQ.IBLTE(IS)+1) THEN
+      IF(IBL.EQ.IBLTE(IS)+1) THEN ! special treatment for the first wake station
 C
 C----- define quantities at start of wake, adding TE base thickness to Dstar
        TTE = THET(IBLTE(1),1) + THET(IBLTE(2),2) ! theta
@@ -973,7 +978,7 @@ C-------- check for transition and set appropriate flags and things
            IF(.NOT.TRAN) ITRAN(IS) = IBL+2 ! why this?
           ENDIF
 C
-          IF(IBL.EQ.IBLTE(IS)+1) THEN
+          IF(IBL.EQ.IBLTE(IS)+1) THEN ! trailing edge equations
            TTE = THET(IBLTE(1),1) + THET(IBLTE(2),2)
            DTE = DSTR(IBLTE(1),1) + DSTR(IBLTE(2),2) + ANTE ! ANTE accounts for TE thickness by modeling it as an extra displacement
            CTE = ( CTAU(IBLTE(1),1)*THET(IBLTE(1),1)
@@ -1042,7 +1047,7 @@ C--------- set unit dHk
            VZTMP(4)  = 1.0
 C
 C--------- calculate dUe response
-           CALL GAUSS(4,4,VTMP,VZTMP,1)
+           CALL GAUSS(4,4,VTMP,VZTMP,1) ! The linear system VTMP * x = VZTMP is solved for x.  Then, x is stored in VZTMP by overwriting
 C
 C--------- set  SENSWT * (normalized dUe/dHk)
            SENNEW = SENSWT * VZTMP(4) * HKREF/UEREF

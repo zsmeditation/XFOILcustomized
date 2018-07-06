@@ -67,6 +67,8 @@ C---- plot width (standard width = 1)
 C
 C---- 1 / total enthalpy
       HSTINV = GAMM1*(MINF/QINF)**2 / (1.0 + 0.5*GAMM1*MINF**2)
+C-    Using formulea: 1/h_0 = 1/(c_p T_0);  c_p = gamma/(gamma-1)*R;  T_0 = T * (1+0.5*(gamma-1)M_inf^2);  T = c^2/(gamma*R)
+C-----
 C
 C---- Sutherland's const./To   (assumes stagnation conditions are at STP)
       HVRAT = 0.35

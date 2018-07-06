@@ -1439,12 +1439,12 @@ C
       IBL = 1
       DO 10 I=IST, 1, -1
         IBL = IBL+1
-        IPAN(IBL,IS) = I
+        IPAN(IBL,IS) = I ! Note that IPAN(1,IS) is not filled here
         VTI(IBL,IS) = 1.0
    10 CONTINUE
 C
       IBLTE(IS) = IBL
-      NBL(IS) = IBL ! total number of locations on the total surface
+      NBL(IS) = IBL ! total number of locations on the top surface
 C
 C---- bottom surface next
       IS = 2
