@@ -67,6 +67,12 @@ C---location of plot origin on window
       GX_ORG = 0
       GY_ORG = 0
 C
+C---set window size parameters to avoid arithmetic faults
+c-   in case no-plot option is selected
+      GX_SIZ = 1.0
+      GY_SIZ = 1.0
+      G_SCALE = 1.0
+
       return
       end
 
@@ -650,4 +656,5 @@ c---- find the index of the last non-blank charater in NAME
       end do
  40   return
       end
+
 
