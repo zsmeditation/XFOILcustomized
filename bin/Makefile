@@ -6,7 +6,7 @@
 
 
 SHELL = sh
-BINDIR = /Users/shunz/Workstation/XFOILcustomized/bin/ # the user should modify this directory 
+BINDIR = /Users/shunz/Workstation/XFOIL/bin/ # the user should modify this directory 
 #BINDIR = .
 
 PROGS = xfoil pplot pxplot
@@ -51,7 +51,10 @@ PLTLIB = -L/usr/X11/lib -lX11
 # INSTALLCMD = install -s
 
 CC = gcc
-CFLAGS = -O -DUNDERSCORE
+# CFLAGS = -O -DUNDERSCORE
+CFLAGS = -Og -DUNDERSCORE
+CFLAGS = -O0 -g -DUNDERSCORE
+# CFLAGS = -g -DUNDERSCORE
 
 ##--------------------------
 
@@ -118,10 +121,17 @@ CFLAGS = -O -DUNDERSCORE
 ### Gfortran
 FC = gfortran
 CHK = 
+# CHK = -fbounds-check -finit-real=inf -ffpe-trap=invalid,zero,overflow,underflow,precision,denormal
 CHK = -fbounds-check -finit-real=inf -ffpe-trap=invalid,zero
 DBL = -fdefault-real-8
-FFLAGS = -O $(CHK) $(DBL)
-FFLOPT = -O $(CHK) $(DBL)
+# FFLAGS = -O $(CHK) $(DBL)
+# FFLOPT = -O $(CHK) $(DBL)
+# FFLAGS = -Og $(CHK) $(DBL)
+# FFLOPT = -Og $(CHK) $(DBL)
+FFLAGS = -O0 -g $(CHK) $(DBL)
+FFLOPT = -O0 -g $(CHK) $(DBL)
+# FFLAGS = -g $(CHK) $(DBL)
+# FFLOPT = -g $(CHK) $(DBL)
 FTNLIB =
 INSTALLCMD = install -s
 
