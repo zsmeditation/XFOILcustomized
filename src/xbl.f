@@ -174,7 +174,7 @@ C
 C**** Sweep downstream setting up BL equation linearizations
       DO 1000 IBL=2, NBL(IS)
 C
-      IV  = ISYS(IBL,IS)
+      IV = ISYS(IBL,IS)
 C
 C---- set locigal flags to identify proper BL/wake identity
       SIMI = IBL.EQ.2 ! similarity station
@@ -231,7 +231,7 @@ C---- check for transition and set TRAN, XT, etc. if found
         CALL TRCHEK
         AMI = AMPL2
       ENDIF
-C---- when the current interval contains transition in the previous solution iteration, but no longer contains transition in the current iteration
+C---- when the current interval contains transition in the previous solution iteration, but no longer contains transition in the current iteration??
       IF(IBL.EQ.ITRAN(IS) .AND. .NOT.TRAN) THEN
        WRITE(*,*) 'SETBL: Xtr???  n1 n2: ', AMPL1, AMPL2
       ENDIF
@@ -468,7 +468,7 @@ C-      (for user output)
         YOCTR(IS) = ((YTR-YLE)*CHX - (XTR-XLE)*CHY)/CHSQ
       ENDIF
 C
-      TRAN = .FALSE.
+      TRAN = .FALSE. ! redundant???
 C
       IF(IBL.EQ.IBLTE(IS)) THEN
 C----- set "2" variables at TE to wake correlations for next station
@@ -889,6 +889,12 @@ C     natural Ue-Hk characteristic line of the
 C     current BL so that the Goldstein or Levy-Lees
 C     singularity is never encountered.  Continuous
 C     checking of transition onset is performed.
+C
+C     The calculated (Ue, Hk) lies on the intersection of the natural Ue-Hk
+C     characteristic line and a line  (passing through (Ue, Hk)_calculated and
+C     (Ue, Hk)_current) that is quasi-normal (approximately orthogonal) to the
+C     tangent line at (Ue, Hk)_calculated.
+C     The Ue-Hk characteristic line is analogous to Fig. 3 of (Lock, Williams 1987, pp99).
 C----------------------------------------------------
       INCLUDE 'XFOIL.INC'
       INCLUDE 'XBL.INC'
@@ -1039,25 +1045,26 @@ C
   201        CONTINUE
    20      CONTINUE
 C
-C--------- set unit dHk
+C--------- set unit dHk: dHk = HK2_T2 * dT2 + HK2_D2 * dD2 + HK2_UEI * dUEI = 1
            VTMP(4,1) = 0.
            VTMP(4,2) = HK2_T2
            VTMP(4,3) = HK2_D2
            VTMP(4,4) = HK2_U2*U2_UEI
            VZTMP(4)  = 1.0
 C
-C--------- calculate dUe response
+C--------- calculate dUe response: i.e. dUe/dHk for unit dHk
            CALL GAUSS(4,4,VTMP,VZTMP,1) ! The linear system VTMP * x = VZTMP is solved for x.  Then, x is stored in VZTMP by overwriting
 C
-C--------- set  SENSWT * (normalized dUe/dHk)
+C--------- set  SENSWT * (normalized dUe/dHk).  Note that VZTMP(4) stores dUe/dHk
            SENNEW = SENSWT * VZTMP(4) * HKREF/UEREF
            IF(ITBL.LE.5) THEN
             SENS = SENNEW
            ELSE IF(ITBL.LE.15) THEN
-            SENS = 0.5*(SENS + SENNEW)
+            SENS = 0.5*(SENS + SENNEW) ! relaxation
            ENDIF
 C
 C--------- set prescribed Ue-Hk combination
+C--------- governing equation: HKREF^2*(HK2/HKREF - 1.0) + SENS*(U2/UEREF - 1.0) = 0
            VS2(4,1) = 0.
            VS2(4,2) =  HK2_T2 * HKREF
            VS2(4,3) =  HK2_D2 * HKREF
@@ -1070,12 +1077,12 @@ C
 C-------- solve Newton system for current "2" station
           CALL GAUSS(4,4,VS2,VSREZ,1)
 C
-C-------- determine max changes and underrelax if necessary
+C-------- determine max fractional changes and underrelax if necessary
 C-------- (added Ue clamp   MD  3 Apr 03)
           DMAX = MAX( ABS(VSREZ(2)/THI),
      &                ABS(VSREZ(3)/DSI),
      &                ABS(VSREZ(4)/UEI)  )
-          IF(IBL.GE.ITRAN(IS)) DMAX = MAX(DMAX,ABS(VSREZ(1)/(10.0*CTI)))
+          IF(IBL.GE.ITRAN(IS)) DMAX = MAX(DMAX,ABS(VSREZ(1)/(10.0*CTI))) ! a different max fraction for the CTI variable
 C
           RLX = 1.0
           IF(DMAX.GT.0.3) RLX = 0.3/DMAX
