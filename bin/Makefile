@@ -6,7 +6,7 @@
 
 
 SHELL = sh
-BINDIR = /Users/shunz/Workstation/XFOIL/bin/ # the user should modify this directory 
+BINDIR = /Users/shunz/Workstation/XFOILcustomized/bin/ # the user should modify this directory 
 #BINDIR = .
 
 PROGS = xfoil pplot pxplot
