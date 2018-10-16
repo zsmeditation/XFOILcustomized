@@ -124,11 +124,12 @@ CHK =
 # CHK = -fbounds-check -finit-real=inf -ffpe-trap=invalid,zero,overflow,underflow,precision,denormal
 CHK = -fbounds-check -finit-real=inf -ffpe-trap=invalid,zero
 DBL = -fdefault-real-8
+FIX = -std=legacy  # fix IO incompatibility (runtime error) with newer version of compiler
 # FFLAGS = -O $(CHK) $(DBL)
 # FFLOPT = -O $(CHK) $(DBL)
 # FFLAGS = -Og $(CHK) $(DBL)
 # FFLOPT = -Og $(CHK) $(DBL)
-FFLAGS = -O0 -g $(CHK) $(DBL)
+FFLAGS = -O0 -g $(CHK) $(DBL) $(FIX)
 FFLOPT = -O0 -g $(CHK) $(DBL)
 # FFLAGS = -g $(CHK) $(DBL)
 # FFLOPT = -g $(CHK) $(DBL)
