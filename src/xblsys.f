@@ -1412,6 +1412,13 @@ C
       ST_UT = CTR*CQ2_U2 + CQ2*CTR_HK2*HK2_U2
       ST_MS = CTR*CQ2_MS + CQ2*CTR_HK2*HK2_MS
       ST_RE = CTR*CQ2_RE
+CC---- fixed initial ctau^0.5
+C      ST    = 0.01
+C      ST_TT = 0.0
+C      ST_DT = 0.0
+C      ST_UT = 0.0
+C      ST_MS = 0.0
+C      ST_RE = 0.0
 C
 C---- calculate ST sensitivities wrt the actual "1" and "2" variables
       ST_A1 = ST_TT*TT_A1 + ST_DT*DT_A1 + ST_UT*UT_A1
