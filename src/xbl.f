@@ -511,10 +511,10 @@ C---- next streamwise station
 C
       IF(TFORCE(IS)) THEN
        WRITE(*,9100) IS,XOCTR(IS),ITRAN(IS)
- 9100  FORMAT(1X,'Side',I2,' forced transition at x/c = ',F7.4,I5)
+ 9100  FORMAT(1X,'Side',I2,' forced transition at x/c = ',F15.12,I5)
       ELSE
        WRITE(*,9200) IS,XOCTR(IS),ITRAN(IS)
- 9200  FORMAT(1X,'Side',I2,'  free  transition at x/c = ',F7.4,I5)
+ 9200  FORMAT(1X,'Side',I2,'  free  transition at x/c = ',F15.12,I5)
       ENDIF
 C
 C---- next airfoil side
