@@ -2433,7 +2433,7 @@ C
       IF(HK.LT.HO) THEN
 C----- attached branch
 C=======================================================
-C----- old correlation
+C----- old correlation  [used in (Drela & Giles, 1987), Eq.18]
 C-     (from Swafford profiles)
 c       SRT = SQRT(RT)
 c       HEX = (HO-HK)**1.6
