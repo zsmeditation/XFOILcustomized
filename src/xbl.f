@@ -1417,6 +1417,7 @@ C
       RMSBL = 0.
       RMXBL = 0.
 C
+C----- underrelax such that the normalized update step dq satisfies that DLO <= dq <= DHI
       DHI = 1.5
       DLO = -.5
 C
@@ -1425,8 +1426,6 @@ C---- calculate changes in BL variables and under-relaxation if needed
         DO 40 IBL=2, NBL(IS)
           IV = ISYS(IBL,IS)
 C
-
-
 C-------- set changes without underrelaxation
           DCTAU = VDEL(1,1,IV) - DAC*VDEL(1,2,IV)
           DTHET = VDEL(2,1,IV) - DAC*VDEL(2,2,IV)
@@ -1435,8 +1434,8 @@ C-------- set changes without underrelaxation
           DDSTR = (DMASS - DSTR(IBL,IS)*DUEDG)/UEDG(IBL,IS)
 C
 C-------- normalize changes
-          IF(IBL.LT.ITRAN(IS)) DN1 = DCTAU / 10.0
-          IF(IBL.GE.ITRAN(IS)) DN1 = DCTAU / CTAU(IBL,IS)
+          IF(IBL.LT.ITRAN(IS)) DN1 = DCTAU / 10.0 ! laminar region
+          IF(IBL.GE.ITRAN(IS)) DN1 = DCTAU / CTAU(IBL,IS) ! turbulent region
           DN2 = DTHET / THET(IBL,IS)
           DN3 = DDSTR / DSTR(IBL,IS)
           DN4 = ABS(DUEDG)/0.25
@@ -1493,7 +1492,7 @@ C
     4 CONTINUE
 C
 C---- set true rms change
-      RMSBL = SQRT( RMSBL / (4.0*FLOAT( NBL(1)+NBL(2) )) )
+      RMSBL = SQRT( RMSBL / (4.0*FLOAT( NBL(1)+NBL(2) )) ) ! normalized by a measure of panel count
 C
 C
       IF(LALFA) THEN
