@@ -1396,8 +1396,8 @@ C
 C---- set initial shear coefficient value ST at transition point
 C-    ( note that CQ2, CQ2_T2, etc. are really "CQT", "CQT_TT", etc.)
 C
-C      CTR     = CTRCON*EXP(-CTRCEX/(HK2-1.0))
-C      CTR_HK2 = CTR * CTRCEX/(HK2-1.0)**2
+      CTR     = CTRCON*EXP(-CTRCEX/(HK2-1.0))
+      CTR_HK2 = CTR * CTRCEX/(HK2-1.0)**2
 C
 c      CTR     = 1.1*EXP(-10.0/HK2**2)
 c      CTR_HK2 = CTR * 10.0 * 2.0/HK2**3
