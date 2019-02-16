@@ -834,7 +834,7 @@ C
       US2_MS = US2_HS2*HS2_MS + US2_HK2*HK2_MS
       US2_RE = US2_HS2*HS2_RE
 C
-      IF(ITYP.LE.2 .AND. US2.GT.0.95) THEN
+      IF(ITYP.LE.2 .AND. US2.GT.0.98) THEN
 CCC       WRITE(*,*) 'BLVAR: Us clamped:', US2
        US2 = 0.98 ! This seems to be a bug? Wouldn't it be better if US2 = 0.95 so that it is continuous?
        US2_U2 = 0.
@@ -986,13 +986,13 @@ C
        DF_HK2 = DF_FL*FL_HK2
        DF_RT2 = DF_FL*FL_RT2
 C
+       DI2    = DI2   *DFAC
        DI2_S2 = DI2_S2*DFAC
        DI2_U2 = DI2_U2*DFAC + DI2*(DF_HK2*HK2_U2 + DF_RT2*RT2_U2)
        DI2_T2 = DI2_T2*DFAC + DI2*(DF_HK2*HK2_T2 + DF_RT2*RT2_T2)
        DI2_D2 = DI2_D2*DFAC + DI2*(DF_HK2*HK2_D2                )
        DI2_MS = DI2_MS*DFAC + DI2*(DF_HK2*HK2_MS + DF_RT2*RT2_MS)
        DI2_RE = DI2_RE*DFAC + DI2*(                DF_RT2*RT2_RE)
-       DI2    = DI2   *DFAC
 C
       ELSE
 C
@@ -1396,8 +1396,8 @@ C
 C---- set initial shear coefficient value ST at transition point
 C-    ( note that CQ2, CQ2_T2, etc. are really "CQT", "CQT_TT", etc.)
 C
-      CTR     = CTRCON*EXP(-CTRCEX/(HK2-1.0))
-      CTR_HK2 = CTR * CTRCEX/(HK2-1.0)**2
+C      CTR     = CTRCON*EXP(-CTRCEX/(HK2-1.0))
+C      CTR_HK2 = CTR * CTRCEX/(HK2-1.0)**2
 C
 c      CTR     = 1.1*EXP(-10.0/HK2**2)
 c      CTR_HK2 = CTR * 10.0 * 2.0/HK2**3
@@ -2518,7 +2518,7 @@ C
       THK = TANH(4.0 - HK/0.875)
 C
       CFO =  CFFAC * 0.3*EXP(ARG) * (GRT/2.3026)**GEX
-      CF     = ( CFO  +  1.1E-4*(THK-1.0) ) / FC
+      CF     = ( CFO  +  1.1E-4*(THK-1.0) ) / FC ! MSES paper Eqn (14)
       CF_HK  = (-1.33*CFO - 0.31*LOG(GRT/2.3026)*CFO
      &         - 1.1E-4*(1.0-THK**2) / 0.875    ) / FC
       CF_RT  = GEX*CFO/(FC*GRT) / RT
@@ -2533,7 +2533,7 @@ C
       REAL MSQ
 C
 C---- density shape parameter    (from Whitfield)
-      HC     = MSQ * (0.064/(HK-0.8) + 0.251)
+      HC     = MSQ * (0.064/(HK-0.8) + 0.251) ! MSES paper Eqn (13)
       HC_HK  = MSQ * (-.064/(HK-0.8)**2     )
       HC_MSQ =        0.064/(HK-0.8) + 0.251
 C
