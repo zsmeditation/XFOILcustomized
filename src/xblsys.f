@@ -735,6 +735,8 @@ C----------------------------------------------------------
       INCLUDE 'XBL.INC'
 C
 C---- set edge Mach number ** 2
+C     Use that M^2 = U^2/c^2, where sound speed c = sqrt(gamma*R*T), Cp = gamma/(gamma-1)R, , R is gas constant
+c     and isentropic relation h0/h = (1+0.5*(gamma-1)M^2)
       M2    = U2*U2*HSTINV / (GM1BL*(1.0 - 0.5*U2*U2*HSTINV))
       TR2   = 1.0 + 0.5*GM1BL*M2
       M2_U2 = 2.0*M2*TR2/U2

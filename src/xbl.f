@@ -59,9 +59,13 @@ C---- set parameters for compressibility correction
       TKBL_MS = TKL_MSQ
 C
 C---- stagnation density and 1/enthalpy
-      RSTBL    = (1.0 + 0.5*GM1BL*MINF**2) ** (1.0/GM1BL)
+c
+c     Use isentropic relation: rho0/rho = (1+0.5*(gamma-1)M^2)^(1/(gamma-1))
+      RSTBL    = (1.0 + 0.5*GM1BL*MINF**2) ** (1.0/GM1BL) ! rho0.  Assume freestream rho_inf = 1
       RSTBL_MS = 0.5*RSTBL/(1.0 + 0.5*GM1BL*MINF**2)
 C
+c     enthalpy: h = Cp T, where Cp = gamma/(gamma-1)R, sound speed c = sqrt(gamma*R*T), R is gas constant
+c     Use isentropic relation: h0/h = (1+0.5*(gamma-1)M^2)
       HSTINV    = GM1BL*(MINF/QINFBL)**2 / (1.0 + 0.5*GM1BL*MINF**2) ! 1/total enthalpy; appeared in blplot.f
       HSTINV_MS = GM1BL*( 1.0/QINFBL)**2 / (1.0 + 0.5*GM1BL*MINF**2)
      &                - 0.5*GM1BL*HSTINV / (1.0 + 0.5*GM1BL*MINF**2)
@@ -845,7 +849,7 @@ C------ store primary variables
         UEDG(IBL,IS) = UEI
         MASS(IBL,IS) = DSI*UEI
         TAU(IBL,IS)  = 0.5*R2*U2*U2*CF2
-        DIS(IBL,IS)  =     R2*U2*U2*U2*DI2*HS2*0.5
+        DIS(IBL,IS)  =     R2*U2*U2*U2*DI2*HS2*0.5 ! note DI2 is defined as (2 C_Diss / H* )
         CTQ(IBL,IS)  = CQ2
         DELT(IBL,IS) = DE2
         TSTR(IBL,IS) = HS2*T2
