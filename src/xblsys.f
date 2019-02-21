@@ -2390,19 +2390,19 @@ C
       END
 
 
-
-      SUBROUTINE DIT( HS, US, CF, ST, DI, DI_HS, DI_US, DI_CF, DI_ST )
-C     This function was called under BLVAR around line 946 but has been commented out
-C
-C---- Turbulent dissipation function  ( 2 CD/H* )
-      DI    =  ( 0.5*CF*US + ST*ST*(1.0-US) ) * 2.0/HS
-      DI_HS = -( 0.5*CF*US + ST*ST*(1.0-US) ) * 2.0/HS**2
-      DI_US =  ( 0.5*CF    - ST*ST          ) * 2.0/HS
-      DI_CF =  ( 0.5   *US                  ) * 2.0/HS
-      DI_ST =  (            2.0*ST*(1.0-US) ) * 2.0/HS
-C
-      RETURN
-      END
+CC ---- This function is not used
+C      SUBROUTINE DIT( HS, US, CF, ST, DI, DI_HS, DI_US, DI_CF, DI_ST )
+CC     This function was called under BLVAR around line 946 but has been commented out
+CC
+CC---- Turbulent dissipation function  ( 2 CD/H* )
+C      DI    =  ( 0.5*CF*US + ST*ST*(1.0-US) ) * 2.0/HS
+C      DI_HS = -( 0.5*CF*US + ST*ST*(1.0-US) ) * 2.0/HS**2
+C      DI_US =  ( 0.5*CF    - ST*ST          ) * 2.0/HS
+C      DI_CF =  ( 0.5   *US                  ) * 2.0/HS
+C      DI_ST =  (            2.0*ST*(1.0-US) ) * 2.0/HS
+CC
+C      RETURN
+C      END
 
 
       SUBROUTINE HST( HK, RT, MSQ, HS, HS_HK, HS_RT, HS_MSQ )

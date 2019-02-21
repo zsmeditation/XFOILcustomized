@@ -2535,7 +2535,7 @@ C
      &              WAKLEN,
      &              SCCON , DUXCON, DLCON,
      &              GACON , GBCON , CTCON,
-     &              CTRCON, CTRCEX
+     &              CTRCON, CTRCEX, CFFAC
  1200 FORMAT(
      &  /' Xtr/c     =', F8.4, '    top    side'
      &  /' Xtr/c     =', F8.4, '    bottom side'
@@ -2545,7 +2545,7 @@ C
      &  /' WakeL/c   =', F8.3,
      & //' Klag  =', F8.4,'     Uxwt  =', F8.2,'       Kdl =', F8.4
      &  /' A     =', F8.4,'     B     =', F8.4,'       KCt =', F8.5
-     &  /' CtiniK=', F8.4,'     CtiniX=', F8.4 )
+     &  /' CtiniK=', F8.4,'     CtiniX=', F8.4,'       CFFAC =', F8.5 )
 C
 C======================================================================
 C---- start of user interaction loop
@@ -2581,6 +2581,7 @@ C--------------------------------------------------------------
      & //'   LAG     change lag equation constants'
      &  /'   GB      change G-beta constants A,B'
      &  /'   CTR     change initial transition-Ctau constants'
+     &  /'   CFAC    change Cf scaling factor'
      &  /'   REST    restore BL calibration to baseline')
 C
 C--------------------------------------------------------------
