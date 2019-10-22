@@ -40,7 +40,7 @@ PLTOBJ = ../plotlib/libPlt.a
 
 # The extra location arg here is for Linux which places X libs in /usr/X11R6
 # PLTLIB = -L/usr/X11R6/lib -lX11
-PLTLIB = -L/usr/X11/lib -lX11
+PLTLIB = -L/usr/local/X11/lib -lX11
 
 ###================================================
 ###  Default compilers and flags
