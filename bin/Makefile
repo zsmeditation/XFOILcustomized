@@ -6,7 +6,7 @@
 
 
 SHELL = sh
-BINDIR = /Users/shunz/Workstation/XFOILcustomized/bin/ # the user should modify this directory 
+BINDIR = /Users/shunz/Workstation/Xfoil/bin/ # the user should modify this directory 
 #BINDIR = .
 
 PROGS = xfoil pplot pxplot
@@ -40,7 +40,7 @@ PLTOBJ = ../plotlib/libPlt.a
 
 # The extra location arg here is for Linux which places X libs in /usr/X11R6
 # PLTLIB = -L/usr/X11R6/lib -lX11
-PLTLIB = -L/usr/local/X11/lib -lX11
+PLTLIB = -L/usr/local/X11/lib -lX11  # for mac
 
 ###================================================
 ###  Default compilers and flags
@@ -124,7 +124,7 @@ CHK =
 # CHK = -fbounds-check -finit-real=inf -ffpe-trap=invalid,zero,overflow,underflow,precision,denormal
 CHK = -fbounds-check -finit-real=inf -ffpe-trap=invalid,zero
 DBL = -fdefault-real-8
-FIX = -std=legacy  # fix IO incompatibility (runtime error) with newer version of compiler
+FIX = -std=legacy  # fix IO incompatibility (runtime error) with newer version of compiler # this is required for MacOS 10.15 because otherwise there are compiling errors
 # FFLAGS = -O $(CHK) $(DBL)
 # FFLOPT = -O $(CHK) $(DBL)
 # FFLAGS = -Og $(CHK) $(DBL)

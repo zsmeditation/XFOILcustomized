@@ -1,11 +1,11 @@
 
 SRC = ../src
-PLTOBJ = /home/codes/Xplot/libPlt.a
+# PLTOBJ = /home/codes/Xplot/libPlt.a  # not used
 
 #========================================
 #  Default compiler flags
 FC = gfortran
-FLG = -O2 -fdefault-real-8
+FLG = -O2 -fdefault-real-8 # double precision
 PLTLIB = -lX11
 FTNLIB =
 

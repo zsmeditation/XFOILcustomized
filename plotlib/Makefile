@@ -32,7 +32,7 @@
 # Point to your install directory
 #INSTALLDIR = /home/codes/bin
 #INSTALLDIR = /usr/local/lib
-INSTALLDIR = /Users/shunz/Workstation/Xfoil/
+INSTALLDIR = /Users/shunz/Workstation/Xfoil/plotlib
 
 # Use these to set default library name (overridden in config.make file) 
 # PLTLIB = libPlt.a
