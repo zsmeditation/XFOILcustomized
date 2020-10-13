@@ -1,14 +1,9 @@
 
 SRC = ../src
-# PLTOBJ = /home/codes/Xplot/libPlt.a  # not used
+PLTOBJ = /home/codes/Xplot/libPlt_gDP.a
 
 #========================================
 #  Default compiler flags
-FC = gfortran
-FLG = -O2 -fdefault-real-8 # double precision
-PLTLIB = -lX11
-FTNLIB =
-
 # FC = f77
 # FLG = -O
 # PLTLIB = -lX11
@@ -20,6 +15,13 @@ FTNLIB =
 # FLG = -O -fpe0 -CB
 # PLTLIB = -L/usr/X11R6/lib -lX11
 # FTNLIB = 
+
+#========================================
+#  Uncomment for GNU Fortran Compiler
+FC = gfortran
+FLG = -O2 -fdefault-real-8 # double precision
+PLTLIB = -L/usr/local/X11/lib -lX11  # for mac -lX11
+FTNLIB =
 
 #  Additional IFC stuff needed on MIT's Athena system
 #FC = ifc

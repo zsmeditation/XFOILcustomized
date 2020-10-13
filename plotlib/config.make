@@ -18,8 +18,10 @@ CC  = gcc
 DP = -fdefault-real-8
 
 FFLAGS  = -m64 -O2 $(DP)
-CFLAGS  = -m64 -O2 $(DEFINE) -I/usr/X11/include
+# CFLAGS  = -m64 -O2 $(DEFINE) -I/usr/X11/include # linux
+CFLAGS  = -m64 -O2 $(DEFINE) -I/usr/local/X11/include # mac
 AR = ar r
 RANLIB = ranlib 
-LINKLIB = -L/usr/X11R6/lib -lX11 
+# LINKLIB = -L/usr/X11R6/lib -lX11 # linux
+LINKLIB = -L/usr/local/X11/lib -lX11 # mac
 
